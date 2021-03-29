@@ -1,0 +1,92 @@
+:root {
+    --mgb-masthead--Height: 0;
+    --mgb-browse-top--Height: 0;
+}
+
+.pf-c-badge.pf-m-unread.mgb-attribute,
+.pf-c-badge.pf-m-unread.mgb-capability,
+.pf-c-badge.pf-m-unread.mgb-operation,
+.pf-c-badge.pf-m-unread.mgb-resource {
+    --pf-c-badge--FontSize: var(--pf-global--FontSize--md);
+}
+
+.pf-c-badge.pf-m-unread.mgb-attribute {
+    --pf-c-badge--BackgroundColor: var(--pf-global--success-color--200);
+}
+
+.pf-c-badge.pf-m-unread.mgb-attribute::before {
+    content: "A";
+}
+
+.pf-c-badge.pf-m-unread.mgb-capability {
+    --pf-c-badge--BackgroundColor: var(--pf-global--icon--Color--light);
+}
+
+.pf-c-badge.pf-m-unread.mgb-capability::before {
+    content: "C";
+}
+
+.pf-c-badge.pf-m-unread.mgb-operation {
+    --pf-c-badge--BackgroundColor: var(--pf-global--danger-color--200);
+}
+
+.pf-c-badge.pf-m-unread.mgb-operation::before {
+    content: "O";
+}
+
+.pf-c-badge.pf-m-unread.mgb-resource {
+    --pf-c-badge--BackgroundColor: var(--pf-global--primary-color--200);
+}
+
+.pf-c-badge.pf-m-unread.mgb-resource::before {
+    content: "R";
+}
+
+.mgb-highlight {
+    background-color: var(--pf-global--palette--gold-100);
+}
+
+.mgb-highlightable {
+    transition: background-color 2s ease-out;
+}
+
+.mgb-comment {
+    color: var(--pf-global--Color--400);
+}
+
+.mgb-primary {
+    font-weight: var(--pf-global--FontWeight--bold);
+}
+
+.mgb-secondary {
+    color: var(--pf-global--Color--200);
+}
+
+.mgb-browse {
+    display: grid;
+    grid-template-areas: "tree resource";
+    grid-template-columns: 0.34fr 0.66fr;
+}
+
+.mgb-browse-scroll {
+    height: calc(100vh -
+    var(--mgb-masthead--Height) -
+    var(--mgb-browse-top--Height) -
+    var(--pf-c-page__main-section--PaddingTop) -
+    var(--pf-c-page__main-section--PaddingBottom));
+    overflow: scroll;
+}
+
+.mgb-browse-tree {
+    grid-area: tree;
+}
+
+.mgb-browse-resource {
+    grid-area: resource;
+}
+
+
+.mgb-query-input {
+    --pf-c-form-control--FontSize: var(--pf-global--FontSize--xl);
+}
+
