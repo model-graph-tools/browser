@@ -220,8 +220,9 @@ data class Version(
     val major: Int,
     val minor: Int,
     val patch: Int,
-    val ordinal: Int,
 ) : Model() {
 
     override val name: String = ""
+
+    override fun toString(): String = "$major.$minor.$patch"
 }

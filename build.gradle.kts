@@ -1,6 +1,6 @@
 plugins {
-    kotlin("js") version "1.4.31"
-    kotlin("plugin.serialization") version "1.4.30"
+    kotlin("js") version "1.4.32"
+    kotlin("plugin.serialization") version "1.4.32"
 }
 
 group = "org.wildfly.modelgraph"
@@ -22,7 +22,6 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-    jcenter()
 }
 
 dependencies {

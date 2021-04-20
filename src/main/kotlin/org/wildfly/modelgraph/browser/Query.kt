@@ -47,7 +47,7 @@ import org.wildfly.modelgraph.browser.QueryView.State.DATA_LIST
 import org.wildfly.modelgraph.browser.QueryView.State.INITIAL
 import org.wildfly.modelgraph.browser.QueryView.State.NO_RESULTS
 
-class QueryPresenter : Presenter<QueryView> {
+class QueryPresenter(private val dispatcher: Dispatcher) : Presenter<QueryView> {
 
     override val view: QueryView = QueryView(this)
     val store: ItemsStore<Model> = ItemsStore { it.id }
@@ -55,7 +55,7 @@ class QueryPresenter : Presenter<QueryView> {
     val query: Handler<String> = with(store) {
         handle { items, name ->
             currentQuery.value = name
-            val models = Endpoints.query(name)
+            val models = dispatcher.query(name)
             if (models.size == 0) {
                 view.state.update(NO_RESULTS)
             } else {

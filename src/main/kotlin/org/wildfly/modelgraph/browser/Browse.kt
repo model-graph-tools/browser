@@ -73,7 +73,7 @@ sealed class ResourceState
 object NoResourceDetails : ResourceState()
 data class ResourceDetails(val resource: Resource) : ResourceState()
 
-class BrowsePresenter : Presenter<BrowseView> {
+class BrowsePresenter(private val dispatcher: Dispatcher) : Presenter<BrowseView> {
 
     private val idProvider: IdProvider<Resource, String> = { it.id }
     val breadcrumbStore: BreadcrumbStore<Resource> = BreadcrumbStore(idProvider)
@@ -114,7 +114,7 @@ class BrowsePresenter : Presenter<BrowseView> {
             selected.filterNot { treeItem ->
                 treeItem.unwrap().singletonParent
             }.map { treeItem ->
-                ResourceDetails(Endpoints.resource(treeItem.unwrap().address))
+                ResourceDetails(dispatcher.resource(treeItem.unwrap().address))
             } handledBy resourceState.update
         }
 
@@ -151,7 +151,7 @@ class BrowsePresenter : Presenter<BrowseView> {
         val operation = place.params["operation"]
         val capability = place.params["capability"]
         MainScope().launch {
-            val subtree = Endpoints.subtree(address)
+            val subtree = dispatcher.subtree(address)
             val tree = tree<Resource> {
                 initialSelection = { it.unwrap().address == address }
                 resourceItem(subtree, address)
@@ -204,7 +204,7 @@ class BrowsePresenter : Presenter<BrowseView> {
     }
 
     suspend fun readChildren(parent: Resource): List<TreeItem<Resource>> =
-        groupChildren(parent, Endpoints.children(parent.address)).map { resource ->
+        groupChildren(parent, dispatcher.children(parent.address)).map { resource ->
             treeItem(resource) {
                 if (resource.children.isNotEmpty()) {
                     children {

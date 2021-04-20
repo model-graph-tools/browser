@@ -9,10 +9,13 @@ fun cdi(): CDI = CDIInstance
 
 interface CDI {
     val placeManager: PlaceManager
+    val registry: Registry
+    val dispatcher: Dispatcher
 }
 
 internal object CDIInstance : CDI {
-    override     val placeManager = PlaceManager(placeRequest(HOME)) { placeRequest ->
+
+    override val placeManager = PlaceManager(placeRequest(HOME)) { placeRequest ->
         pageSection {
             title { +"Not Found" }
             p {
@@ -22,4 +25,8 @@ internal object CDIInstance : CDI {
             }
         }
     }
+
+    override val registry: Registry = Registry()
+
+    override val dispatcher: Dispatcher = Dispatcher(registry)
 }

@@ -9,9 +9,9 @@ const val HOME = "home"
 const val QUERY = "query"
 
 fun registerPresenters() {
-    Presenter.register(BROWSE, ::BrowsePresenter)
+    Presenter.register(BROWSE) { BrowsePresenter(cdi().dispatcher) }
     Presenter.register(HOME, ::HomePresenter)
-    Presenter.register(QUERY, ::QueryPresenter)
+    Presenter.register(QUERY) { QueryPresenter(cdi().dispatcher) }
 }
 
 fun browseAttribute(address: String, attribute: String): PlaceRequest =
