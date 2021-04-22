@@ -1,0 +1,9 @@
+upstream mgtapi {
+    server ${MGT_API};
+}
+
+server {
+    location /mgtapi {
+        proxy_pass http://mgtapi;
+    }
+}

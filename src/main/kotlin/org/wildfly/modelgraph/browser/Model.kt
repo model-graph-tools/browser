@@ -6,7 +6,10 @@ import kotlinx.serialization.json.Json
 
 const val SINGLETON_PARENT_TYPE: String = "SingletonParentResource"
 
-val json = Json { classDiscriminator = "modelType" }
+val json = Json {
+    classDiscriminator = "modelType"
+    ignoreUnknownKeys = true
+}
 
 interface Typed {
     val type: String

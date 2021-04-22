@@ -1,9 +1,11 @@
 package org.wildfly.modelgraph.browser
 
+import dev.fritz2.binding.EmittingHandler
 import dev.fritz2.binding.RootStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
+import org.wildfly.modelgraph.browser.Registration.Companion.UNDEFINED
 
 @Serializable
 data class Registration(
@@ -27,6 +29,9 @@ data class Registration(
 }
 
 class Registry : RootStore<List<Registration>>(listOf()) {
-    var active: Registration = Registration.UNDEFINED
     val empty: Flow<Boolean> = data.map { it.isEmpty() }
+}
+
+class ActiveRegistration : RootStore<Registration>(UNDEFINED) {
+    val undefined: Flow<Boolean> = data.map { it == UNDEFINED }
 }

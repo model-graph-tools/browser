@@ -8,6 +8,7 @@ version = "0.0.1"
 
 object Versions {
     // dependencies
+    const val coroutines = "1.4.3"
     const val fritz2 = "0.9"
     const val mvp = "0.3.0"
     const val patternflyFritz2 = "0.3.0-SNAPSHOT"
@@ -25,6 +26,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.serialization}")
     implementation("dev.fritz2:core:${Versions.fritz2}")
     implementation("dev.fritz2:mvp:${Versions.mvp}")

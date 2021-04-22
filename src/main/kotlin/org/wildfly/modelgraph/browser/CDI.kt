@@ -9,6 +9,7 @@ fun cdi(): CDI = CDIInstance
 
 interface CDI {
     val placeManager: PlaceManager
+    val activeRegistration: ActiveRegistration
     val registry: Registry
     val dispatcher: Dispatcher
 }
@@ -26,7 +27,9 @@ internal object CDIInstance : CDI {
         }
     }
 
+    override val activeRegistration: ActiveRegistration = ActiveRegistration()
+
     override val registry: Registry = Registry()
 
-    override val dispatcher: Dispatcher = Dispatcher(registry)
+    override val dispatcher: Dispatcher = Dispatcher(activeRegistration)
 }
