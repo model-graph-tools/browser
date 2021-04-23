@@ -2,6 +2,7 @@ package org.wildfly.modelgraph.browser
 
 import dev.fritz2.mvp.PlaceManager
 import dev.fritz2.mvp.placeRequest
+import org.patternfly.ItemsStore
 import org.patternfly.pageSection
 import org.patternfly.title
 
@@ -9,8 +10,7 @@ fun cdi(): CDI = CDIInstance
 
 interface CDI {
     val placeManager: PlaceManager
-    val activeRegistration: ActiveRegistration
-    val registry: Registry
+    val registry: ItemsStore<Registration>
     val dispatcher: Dispatcher
 }
 
@@ -27,9 +27,7 @@ internal object CDIInstance : CDI {
         }
     }
 
-    override val activeRegistration: ActiveRegistration = ActiveRegistration()
+    override val registry: ItemsStore<Registration> = ItemsStore<Registration> { it.identifier }
 
-    override val registry: Registry = Registry()
-
-    override val dispatcher: Dispatcher = Dispatcher(activeRegistration)
+    override val dispatcher: Dispatcher = Dispatcher(registry)
 }

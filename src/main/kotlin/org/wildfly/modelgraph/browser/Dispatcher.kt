@@ -4,11 +4,12 @@ import dev.fritz2.routing.encodeURIComponent
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 import kotlinx.serialization.decodeFromString
+import org.patternfly.ItemsStore
 
 const val CAPABILITY_BASE = "https://raw.githubusercontent.com/wildfly/wildfly-capabilities/master"
 const val ENDPOINT = "/mgtapi"
 
-class Dispatcher(private val registration: ActiveRegistration) {
+class Dispatcher(private val registry: ItemsStore<Registration>) {
 
     suspend fun registry(): List<Registration> = json.decodeFromString(
         window.fetch("$ENDPOINT/registry").await().text().await()
@@ -19,7 +20,7 @@ class Dispatcher(private val registration: ActiveRegistration) {
             buildString {
                 append(ENDPOINT)
                 append("/resources/children/")
-                append(registration.current.identifier)
+                append(registry.current.selection.firstOrNull()?.identifier)
                 append("?address=")
                 append(encodeURIComponent(address))
             }
@@ -31,7 +32,7 @@ class Dispatcher(private val registration: ActiveRegistration) {
             buildString {
                 append(ENDPOINT)
                 append("/resources/resource/")
-                append(registration.current.identifier)
+                append(registry.current.selection.firstOrNull()?.identifier)
                 append("?address=")
                 append(encodeURIComponent(address))
                 if (Operation.globalOperations.isNotEmpty()) {
@@ -56,7 +57,7 @@ class Dispatcher(private val registration: ActiveRegistration) {
             buildString {
                 append(ENDPOINT)
                 append("/resources/subtree/")
-                append(registration.current.identifier)
+                append(registry.current.selection.firstOrNull()?.identifier)
                 append("?address=")
                 append(encodeURIComponent(address))
             }
@@ -68,7 +69,7 @@ class Dispatcher(private val registration: ActiveRegistration) {
             buildString {
                 append(ENDPOINT)
                 append("/management-model/query/")
-                append(registration.current.identifier)
+                append(registry.current.selection.firstOrNull()?.identifier)
                 append("?name=")
                 append(encodeURIComponent(name))
             }

@@ -13,15 +13,15 @@ fun main() {
 
     registerPresenters()
     render {
-        skeleton()
+        skeleton(cdi().registry)
     }
     AlertGroup.addToastAlertGroup()
 
     MainScope().launch {
         val registrations = cdi().dispatcher.registry()
-        cdi().registry.update(registrations)
+        cdi().registry.addAll(registrations)
         if (registrations.isNotEmpty()) {
-            cdi().activeRegistration.update(registrations[0])
+            cdi().registry.selectOnly(registrations.sortedBy { it.productVersion }.reversed()[0])
         }
     }
 }
