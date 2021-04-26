@@ -1,5 +1,7 @@
 # Browser
 
-SPA which talks to the [registry / gateway](https://github.com/model-graph-tools/registry) to make use of the APIs defined by the [model](https://github.com/model-graph-tools/model) and [diff](https://github.com/model-graph-tools/diff) services.
+SPA which talks to [API](https://github.com/model-graph-tools/api) service to make use of the REST endpoints defined by the [model](https://github.com/model-graph-tools/model) services.
 
-![Model Graph Tools](https://model-graph-tools.github.io/img/tools.png "Model Graph Tools")
+## Get Started
+
+Please take a look at the [setup](https://github.com/model-graph-tools/setup) repository how to get started.
