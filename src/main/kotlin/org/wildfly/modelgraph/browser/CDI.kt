@@ -27,7 +27,7 @@ internal object CDIInstance : CDI {
         }
     }
 
-    override val registry: ItemsStore<Registration> = ItemsStore<Registration> { it.identifier }
+    override val registry: ItemsStore<Registration> = ItemsStore { it.identifier }
 
     override val dispatcher: Dispatcher = Dispatcher(registry)
 }

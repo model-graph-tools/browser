@@ -19,9 +19,12 @@ fun main() {
 
     MainScope().launch {
         val registrations = cdi().dispatcher.registry()
+            .distinctBy { it.identifier }
+            .sortedBy { it.identifier }
+            .reversed()
         cdi().registry.addAll(registrations)
         if (registrations.isNotEmpty()) {
-            cdi().registry.selectOnly(registrations.sortedBy { it.productVersion }.reversed()[0])
+            cdi().registry.selectOnly(registrations[0])
         }
     }
 }
