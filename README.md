@@ -1,6 +1,6 @@
 # Browser
 
-Browser based SPA which talks to [API](https://github.com/model-graph-tools/api) service to make use of the REST endpoints defined by the [model](https://github.com/model-graph-tools/model) services.
+Browser based SPA which talks to the [API](https://github.com/model-graph-tools/api) service to make use of the REST endpoints defined by the [model](https://github.com/model-graph-tools/model) services.
 
 ## Big Picture
 
