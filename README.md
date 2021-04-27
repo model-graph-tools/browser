@@ -6,4 +6,4 @@ Browser based SPA which talks to [API](https://github.com/model-graph-tools/api)
 
 Take a look at the [setup](https://github.com/model-graph-tools/setup) repository how to get started.
 
-<img src="https://model-graph-tools.github.io/img/tools.svg" alt="Model Graph Tools" style="width:50%;" />
+<img src="https://model-graph-tools.github.io/img/tools.svg" alt="Model Graph Tools" width="512" />
