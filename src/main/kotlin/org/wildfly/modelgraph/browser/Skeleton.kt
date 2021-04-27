@@ -1,6 +1,7 @@
 package org.wildfly.modelgraph.browser
 
 import dev.fritz2.dom.html.RenderContext
+import dev.fritz2.mvp.PlaceManager
 import dev.fritz2.mvp.managedBy
 import dev.fritz2.mvp.placeRequest
 import kotlinx.coroutines.flow.filter
@@ -21,7 +22,7 @@ import org.patternfly.pageHeaderToolsItem
 import org.patternfly.pageMain
 import org.patternfly.unwrap
 
-fun RenderContext.skeleton(registry: ItemsStore<Registration>) {
+fun RenderContext.skeleton(registry: ItemsStore<Registration>, placeManager: PlaceManager) {
     val css = ContextSelectorStore<Registration>()
 
     // wire registry and context selector store
@@ -58,11 +59,12 @@ fun RenderContext.skeleton(registry: ItemsStore<Registration>) {
                     src("./model-graph-browser.svg")
                 }
             }
-            horizontalNavigation(cdi().placeManager.router) {
+            horizontalNavigation(placeManager.router) {
                 items {
                     item(placeRequest(BROWSE), "Browse")
                     item(placeRequest(QUERY), "Query")
-
+                    item(placeRequest(DEPRECATION), "Deprecation")
+                    item(placeRequest(NEO4J), "Neo4j")
                 }
             }
             pageHeaderTools {
@@ -70,8 +72,6 @@ fun RenderContext.skeleton(registry: ItemsStore<Registration>) {
                     pageHeaderToolsItem {
                         contextSelector(css)
                     }
-                }
-                pageHeaderToolsGroup {
                     pageHeaderToolsItem {
                         notificationBadge()
                     }
@@ -79,7 +79,7 @@ fun RenderContext.skeleton(registry: ItemsStore<Registration>) {
             }
         }
         pageMain(id = "main") {
-            managedBy(cdi().placeManager)
+            managedBy(placeManager)
         }
     }
 }

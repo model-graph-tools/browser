@@ -1,9 +1,7 @@
 package org.wildfly.modelgraph.browser
 
 import dev.fritz2.dom.html.render
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
-import org.patternfly.AlertGroup
+import org.patternfly.AlertGroup.Companion.addToastAlertGroup
 
 external fun require(name: String): dynamic
 
@@ -13,18 +11,8 @@ fun main() {
 
     registerPresenters()
     render {
-        skeleton(cdi().registry)
+        skeleton(cdi().registry, cdi().placeManager)
     }
-    AlertGroup.addToastAlertGroup()
-
-    MainScope().launch {
-        val registrations = cdi().dispatcher.registry()
-            .distinctBy { it.identifier }
-            .sortedBy { it.identifier }
-            .reversed()
-        cdi().registry.addAll(registrations)
-        if (registrations.isNotEmpty()) {
-            cdi().registry.selectOnly(registrations[0])
-        }
-    }
+    addToastAlertGroup()
+    pollRegistry(cdi().dispatcher, cdi().registry)
 }
