@@ -82,6 +82,8 @@ fun poll(dispatcher: Dispatcher, registry: ItemsStore<Registration>) {
             } else {
                 registry.selectOnly(registrations[0])
             }
+        } else {
+            registry.selectNone(Unit)
         }
     }
 }

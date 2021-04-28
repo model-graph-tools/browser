@@ -8,7 +8,7 @@ version = "0.0.1"
 
 object Versions {
     // dependencies
-    const val fritz2 = "0.9"
+    const val fritz2 = "0.9.2"
     const val mvp = "0.3.0"
     const val patternflyFritz2 = "0.3.0-SNAPSHOT"
     const val serialization = "1.1.0"

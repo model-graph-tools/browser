@@ -12,7 +12,7 @@ const val NEO4J = "neo4j"
 
 fun registerPresenters() {
     Presenter.register(BROWSE) { BrowsePresenter(cdi().dispatcher) }
-    Presenter.register(HOME, ::HomePresenter)
+    Presenter.register(HOME) { HomePresenter(cdi().registry) }
     Presenter.register(QUERY) { QueryPresenter(cdi().dispatcher) }
     Presenter.register(DEPRECATION) { DeprecationPresenter(cdi().dispatcher) }
     Presenter.register(NEO4J) { Neo4jPresenter(cdi().registry) }

@@ -45,8 +45,8 @@ import org.patternfly.fas
 import org.patternfly.icon
 import org.patternfly.item
 import org.patternfly.items
+import org.patternfly.layout
 import org.patternfly.modifier
-import org.patternfly.pageBreadcrumb
 import org.patternfly.pageSection
 import org.patternfly.tabs
 import org.patternfly.textContent
@@ -236,208 +236,216 @@ class BrowsePresenter(private val dispatcher: Dispatcher) : Presenter<BrowseView
 class BrowseView(override val presenter: BrowsePresenter) : View, WithPresenter<BrowsePresenter> {
 
     override val content: ViewContent = {
-        pageBreadcrumb(id = "mgb-browse-top", limitWidth = true) {
-            breadcrumb(presenter.breadcrumbStore, noHomeLink = true) {
-                display { +it.name }
+        pageSection(baseClass = classes("light".modifier(), "grid".layout(), "gutter".modifier())) {
+            div(id = "mgb-browse-top", baseClass = classes("grid".layout("item"), "12-col".modifier())) {
+                breadcrumb(presenter.breadcrumbStore, noHomeLink = true) {
+                    display { +it.name }
+                }
+            }
+            div(baseClass = classes("grid".layout("item"), "4-col".modifier(), "mgb-browse-scroll")) {
+                treeView(presenter.treeStore, baseClass = "pt-0".util()) {
+                    display { resource ->
+                        span(baseClass = classes {
+                            +("mgb-deprecated" `when` resource.deprecated)
+                        }) {
+                            if (resource.address == "/") +"Management Model" else +resource.name
+                        }
+                    }
+                    fetchItems { treeItem ->
+                        presenter.readChildren(treeItem.unwrap())
+                    }
+                    iconProvider { resource ->
+                        when {
+                            resource.address == "/" -> {
+                                SingleIcon { icon("sitemap".fas()) }
+                            }
+                            resource.singletonParent -> {
+                                SingleIcon { icon("list".fas()) }
+                            }
+                            resource.singleton -> {
+                                SingleIcon { icon("file-alt".fas()) }
+                            }
+                            else -> {
+                                DoubleIcon(
+                                    { icon("folder".fas()) },
+                                    { icon("folder-open".fas()) }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            div(baseClass = classes("grid".layout("item"), "8-col".modifier(), "mgb-browse-scroll")) {
+                textContent(baseClass = "mb-md".util()) {
+                    p { presenter.treeStore.selected.map { it.unwrap().description }.asText() }
+                }
+                tabs(presenter.tabStore) {
+                    hideIf(presenter.treeStore.selected.unwrap()) { it.singletonParent }
+                    tabDisplay { +it.text }
+                    items {
+                        item(ATTRIBUTES) {
+                            div(baseClass = "mt-lg".util()) {
+                                showIf(presenter.resourceState.data) {
+                                    it is ResourceDetails && it.resource.attributes.isEmpty()
+                                }
+                                emptyState(
+                                    size = Size.XS,
+                                    iconClass = "ban".fas(),
+                                    title = "No attributes"
+                                ) {
+                                    emptyStateBody {
+                                        +"This resource does not contain any attributes."
+                                    }
+                                }
+                            }
+                            div {
+                                showIf(presenter.resourceState.data) {
+                                    it is ResourceDetails && it.resource.attributes.isNotEmpty()
+                                }
+                                dataTable(
+                                    presenter.attributesStore,
+                                    baseClass = "compact".modifier()
+                                ) {
+                                    dataTableColumns {
+                                        dataTableColumn("Name") {
+                                            headerClass("width-55".modifier())
+                                            cellDisplay { attribute ->
+                                                div(
+                                                    id = itemId(attribute),
+                                                    baseClass = "mgb-highlightable"
+                                                ) {
+                                                    domNode.dataset["attribute"] = attribute.name
+                                                    strong { +attribute.name }
+                                                }
+                                                attribute.description?.let {
+                                                    div { +it }
+                                                }
+                                            }
+                                        }
+                                        dataTableColumn("Type") {
+                                            headerClass("width-15".modifier())
+                                            cellDisplay { attribute -> +attribute.type }
+                                        }
+                                        dataTableColumn("Storage") {
+                                            headerClass("width-15".modifier())
+                                            cellDisplay { attribute -> +(attribute.storage ?: "n/a") }
+                                        }
+                                        dataTableColumn("Access Type") {
+                                            headerClass("width-15".modifier())
+                                            cellDisplay { attribute -> +(attribute.accessType ?: "n/a") }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        item(OPERATIONS) {
+                            div(baseClass = "mt-lg".util()) {
+                                showIf(presenter.resourceState.data) {
+                                    it is ResourceDetails && it.resource.operations.isEmpty()
+                                }
+                                emptyState(
+                                    size = Size.XS,
+                                    iconClass = "ban".fas(),
+                                    title = "No operations"
+                                ) {
+                                    emptyStateBody {
+                                        +"This resource does not provide any operations."
+                                    }
+                                }
+                            }
+                            div {
+                                showIf(presenter.resourceState.data) {
+                                    it is ResourceDetails && it.resource.operations.isNotEmpty()
+                                }
+                                dataTable(
+                                    presenter.operationsStore,
+                                    baseClass = "compact".modifier()
+                                ) {
+                                    dataTableColumns {
+                                        dataTableColumn("Name") {
+                                            cellDisplay { operation ->
+                                                div(
+                                                    id = itemId(operation),
+                                                    baseClass = "mgb-highlightable"
+                                                ) {
+                                                    domNode.dataset["operation"] = operation.name
+                                                    strong { +operation.name }
+                                                }
+                                                operation.description?.let {
+                                                    div { +it }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        item(CAPABILITIES) {
+                            div(baseClass = "mt-lg".util()) {
+                                showIf(presenter.resourceState.data) {
+                                    it is ResourceDetails && it.resource.capabilities.isEmpty()
+                                }
+                                emptyState(
+                                    size = Size.XS,
+                                    iconClass = "ban".fas(),
+                                    title = "No capabilities"
+                                ) {
+                                    emptyStateBody {
+                                        +"This resource does not provide any capabilities."
+                                    }
+                                }
+                            }
+                            div {
+                                showIf(presenter.resourceState.data) {
+                                    it is ResourceDetails && it.resource.capabilities.isNotEmpty()
+                                }
+                                dataTable(
+                                    presenter.capabilitiesStore,
+                                    baseClass = "compact".modifier()
+                                ) {
+                                    dataTableColumns {
+                                        dataTableColumn("Name") {
+                                            cellDisplay { capability ->
+                                                a(
+                                                    id = itemId(capability),
+                                                    baseClass = "mgb-highlightable"
+                                                ) {
+                                                    domNode.dataset["capability"] = capability.name
+                                                    href(
+                                                        "$CAPABILITY_BASE/${
+                                                            capability.name.replace(
+                                                                '.',
+                                                                '/'
+                                                            )
+                                                        }/capability.adoc"
+                                                    )
+                                                    target("capability")
+                                                    +capability.name
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
+/*
         pageSection(
             limitWidth = true,
             baseClass = classes("light".modifier(), "overflow-scroll".modifier())
         ) {
             div(baseClass = "mgb-browse") {
                 div(baseClass = classes("mgb-browse-tree", "mgb-browse-scroll", "mr-md".util())) {
-                    treeView(presenter.treeStore, baseClass = "pt-0".util()) {
-                        display { resource ->
-                            span {
-                                if (resource.deprecated) {
-                                    // TODO Use custom CSS class
-                                    domNode.style.textDecoration = "line-through"
-                                }
-                                if (resource.address == "/") +"Management Model" else +resource.name
-                            }
-                        }
-                        fetchItems { treeItem ->
-                            presenter.readChildren(treeItem.unwrap())
-                        }
-                        iconProvider { resource ->
-                            when {
-                                resource.address == "/" -> {
-                                    SingleIcon { icon("sitemap".fas()) }
-                                }
-                                resource.singletonParent -> {
-                                    SingleIcon { icon("list".fas()) }
-                                }
-                                resource.singleton -> {
-                                    SingleIcon { icon("file-alt".fas()) }
-                                }
-                                else -> {
-                                    DoubleIcon(
-                                        { icon("folder".fas()) },
-                                        { icon("folder-open".fas()) }
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    // treeview
                 }
                 div(baseClass = classes("mgb-browse-resources", "mgb-browse-scroll")) {
-                    textContent(baseClass = "mb-md".util()) {
-                        p { presenter.treeStore.selected.map { it.unwrap().description }.asText() }
-                    }
-                    tabs(presenter.tabStore) {
-                        hideIf(presenter.treeStore.selected.unwrap()) { it.singletonParent }
-                        tabDisplay { +it.text }
-                        items {
-                            item(ATTRIBUTES) {
-                                div(baseClass = "mt-lg".util()) {
-                                    showIf(presenter.resourceState.data) {
-                                        it is ResourceDetails && it.resource.attributes.isEmpty()
-                                    }
-                                    emptyState(
-                                        size = Size.XS,
-                                        iconClass = "ban".fas(),
-                                        title = "No attributes"
-                                    ) {
-                                        emptyStateBody {
-                                            +"This resource does not contain any attributes."
-                                        }
-                                    }
-                                }
-                                div {
-                                    showIf(presenter.resourceState.data) {
-                                        it is ResourceDetails && it.resource.attributes.isNotEmpty()
-                                    }
-                                    dataTable(
-                                        presenter.attributesStore,
-                                        baseClass = "compact".modifier()
-                                    ) {
-                                        dataTableColumns {
-                                            dataTableColumn("Name") {
-                                                headerClass("width-55".modifier())
-                                                cellDisplay { attribute ->
-                                                    div(
-                                                        id = itemId(attribute),
-                                                        baseClass = "mgb-highlightable"
-                                                    ) {
-                                                        domNode.dataset["attribute"] = attribute.name
-                                                        strong { +attribute.name }
-                                                    }
-                                                    attribute.description?.let {
-                                                        div { +it }
-                                                    }
-                                                }
-                                            }
-                                            dataTableColumn("Type") {
-                                                headerClass("width-15".modifier())
-                                                cellDisplay { attribute -> +attribute.type }
-                                            }
-                                            dataTableColumn("Storage") {
-                                                headerClass("width-15".modifier())
-                                                cellDisplay { attribute -> +(attribute.storage ?: "n/a") }
-                                            }
-                                            dataTableColumn("Access Type") {
-                                                headerClass("width-15".modifier())
-                                                cellDisplay { attribute -> +(attribute.accessType ?: "n/a") }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            item(OPERATIONS) {
-                                div(baseClass = "mt-lg".util()) {
-                                    showIf(presenter.resourceState.data) {
-                                        it is ResourceDetails && it.resource.operations.isEmpty()
-                                    }
-                                    emptyState(
-                                        size = Size.XS,
-                                        iconClass = "ban".fas(),
-                                        title = "No operations"
-                                    ) {
-                                        emptyStateBody {
-                                            +"This resource does not provide any operations."
-                                        }
-                                    }
-                                }
-                                div {
-                                    showIf(presenter.resourceState.data) {
-                                        it is ResourceDetails && it.resource.operations.isNotEmpty()
-                                    }
-                                    dataTable(
-                                        presenter.operationsStore,
-                                        baseClass = "compact".modifier()
-                                    ) {
-                                        dataTableColumns {
-                                            dataTableColumn("Name") {
-                                                cellDisplay { operation ->
-                                                    div(
-                                                        id = itemId(operation),
-                                                        baseClass = "mgb-highlightable"
-                                                    ) {
-                                                        domNode.dataset["operation"] = operation.name
-                                                        strong { +operation.name }
-                                                    }
-                                                    operation.description?.let {
-                                                        div { +it }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            item(CAPABILITIES) {
-                                div(baseClass = "mt-lg".util()) {
-                                    showIf(presenter.resourceState.data) {
-                                        it is ResourceDetails && it.resource.capabilities.isEmpty()
-                                    }
-                                    emptyState(
-                                        size = Size.XS,
-                                        iconClass = "ban".fas(),
-                                        title = "No capabilities"
-                                    ) {
-                                        emptyStateBody {
-                                            +"This resource does not provide any capabilities."
-                                        }
-                                    }
-                                }
-                                div {
-                                    showIf(presenter.resourceState.data) {
-                                        it is ResourceDetails && it.resource.capabilities.isNotEmpty()
-                                    }
-                                    dataTable(
-                                        presenter.capabilitiesStore,
-                                        baseClass = "compact".modifier()
-                                    ) {
-                                        dataTableColumns {
-                                            dataTableColumn("Name") {
-                                                cellDisplay { capability ->
-                                                    a(
-                                                        id = itemId(capability),
-                                                        baseClass = "mgb-highlightable"
-                                                    ) {
-                                                        domNode.dataset["capability"] = capability.name
-                                                        href(
-                                                            "$CAPABILITY_BASE/${
-                                                                capability.name.replace(
-                                                                    '.',
-                                                                    '/'
-                                                                )
-                                                            }/capability.adoc"
-                                                        )
-                                                        target("capability")
-                                                        +capability.name
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    // resource
                 }
             }
         }
+*/
     }
 }

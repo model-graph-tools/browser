@@ -24,6 +24,9 @@ server {
         index index.html index.htm;
         expires -1;
         try_files $uri $uri/ /index.html;
+        add_header Access-Control-Allow-Origin "*";
+        add_header Access-Control-Allow-Methods "*";
+        add_header Access-Control-Allow-Headers "*";
     }
 
     location /mgtapi {

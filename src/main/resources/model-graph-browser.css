@@ -1,8 +1,6 @@
-:root {
-    --mgb-masthead--Height: 0;
-    --mgb-browse-top--Height: 0;
-}
-
+/*
+ * PatternFly 4
+ */
 .pf-c-badge.pf-m-unread.mgb-attribute,
 .pf-c-badge.pf-m-unread.mgb-capability,
 .pf-c-badge.pf-m-unread.mgb-operation,
@@ -42,30 +40,14 @@
     content: "R";
 }
 
-.mgb-highlight {
-    background-color: var(--pf-global--palette--gold-100);
-}
 
-.mgb-highlightable {
-    transition: background-color 2s ease-out;
-}
 
-.mgb-comment {
-    color: var(--pf-global--Color--400);
-}
-
-.mgb-primary {
-    font-weight: var(--pf-global--FontWeight--bold);
-}
-
-.mgb-secondary {
-    color: var(--pf-global--Color--200);
-}
-
-.mgb-browse {
-    display: grid;
-    grid-template-areas: "tree resource";
-    grid-template-columns: 0.34fr 0.66fr;
+/*
+ * Model Graph Browser
+ */
+:root {
+    --mgb-masthead--Height: 76px;
+    --mgb-browse-top--Height: 40px;
 }
 
 .mgb-browse-scroll {
@@ -77,16 +59,31 @@
     overflow: scroll;
 }
 
-.mgb-browse-tree {
-    grid-area: tree;
+.mgb-comment {
+    color: var(--pf-global--Color--400);
 }
 
-.mgb-browse-resource {
-    grid-area: resource;
+.mgb-deprecated {
+    text-decoration: line-through;
 }
 
+.mgb-highlight {
+    background-color: var(--pf-global--palette--gold-100);
+}
+
+.mgb-highlightable {
+    transition: background-color 2s ease-out;
+}
+
+.mgb-primary {
+    font-weight: var(--pf-global--FontWeight--bold);
+}
 
 .mgb-query-input {
     --pf-c-form-control--FontSize: var(--pf-global--FontSize--xl);
+}
+
+.mgb-secondary {
+    color: var(--pf-global--Color--200);
 }
 

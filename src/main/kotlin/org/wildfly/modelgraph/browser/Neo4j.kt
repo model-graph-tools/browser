@@ -3,9 +3,8 @@ package org.wildfly.modelgraph.browser
 import dev.fritz2.mvp.Presenter
 import dev.fritz2.mvp.View
 import dev.fritz2.mvp.ViewContent
-import org.patternfly.ButtonVariation
+import kotlinx.coroutines.flow.map
 import org.patternfly.ItemsStore
-import org.patternfly.linkButton
 import org.patternfly.modifier
 import org.patternfly.pageSection
 import org.patternfly.textContent
@@ -19,7 +18,6 @@ class Neo4jView(registry: ItemsStore<Registration>) : View {
     override val content: ViewContent = {
         pageSection(baseClass = "light".modifier()) {
             textContent {
-                val registration = registry.current.selection.first()
                 title { +"Neo4j Browser" }
                 p {
                     +"The Neo4j browser is a developer-focused tool to interact with a graph database. It allows developers to execute "
@@ -31,16 +29,23 @@ class Neo4jView(registry: ItemsStore<Registration>) : View {
                     +"  queries and visualize the results."
                 }
                 p {
-                    +"Use the link below to open the Neo4j browser for the current model graph database in a new browser tab. There's no user or password necessary - just hit connect. The Neo4j browser will show a tutorial about the model graph database, once connected."
+                    +"Click on the screenshot below to open the Neo4j browser for the selected WildFly version in a new browser tab. Please choose "
+                    i { +"No authentication" }
+                    +" as authentication type to connect to the database (the database is read-only and requires no username / password)."
+                }
+                p {
+                    +"The Neo4j browser will show a tutorial about the model graph database, once connected."
                 }
                 p {
                     a {
                         img {
-                            src("/neo4j-logo-color.svg")
-                            inlineStyle("height: 32px")
+                            src("/neo4j-browser.png")
+                            inlineStyle("height: 300px")
                         }
-                        target("neo4j-${registration.identifier}")
-                        href("${registration.neo4jBrowserUri}?connectURL=${registration.neo4jBoltUri}")
+                        target(registry.data.map { "neo4j-browser-${it.selection.first().identifier}" })
+                        href(registry.data
+                            .map { it.selection.first() }
+                            .map { "${it.neo4jBrowserUri}?connectURL=${it.neo4jBoltUri}" })
                     }
                 }
             }
