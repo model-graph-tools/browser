@@ -30,8 +30,14 @@ class Neo4jView(registry: ItemsStore<Registration>) : View {
                 }
                 p {
                     +"Click on the screenshot below to open the Neo4j browser for the selected WildFly version in a new browser tab. Please choose "
-                    i { +"No authentication" }
-                    +" as authentication type to connect to the database (the database is read-only and requires no username / password)."
+                }
+                ul {
+                    li {
+                        registry.data.map {
+                            "${it.selection.first().neo4jBoltUri} as connect URL (should be preselected) and"
+                        }.asText()
+                    }
+                    li { +"No authentication as authentication type" }
                 }
                 p {
                     +"The Neo4j browser will show a tutorial about the model graph database, once connected."
@@ -45,7 +51,7 @@ class Neo4jView(registry: ItemsStore<Registration>) : View {
                         target(registry.data.map { "neo4j-browser-${it.selection.first().identifier}" })
                         href(registry.data
                             .map { it.selection.first() }
-                            .map { "${it.neo4jBrowserUri}?connectURL=${it.neo4jBoltUri}" })
+                            .map { "${it.neo4jBrowserUri}?connectURL=${it.neo4jBoltUri}&cmd=connect" })
                     }
                 }
             }

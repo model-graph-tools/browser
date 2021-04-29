@@ -2,6 +2,7 @@ package org.wildfly.modelgraph.browser
 
 import dev.fritz2.binding.RootStore
 import dev.fritz2.binding.storeOf
+import dev.fritz2.dom.html.RenderContext
 import dev.fritz2.lenses.IdProvider
 import dev.fritz2.mvp.PlaceRequest
 import dev.fritz2.mvp.Presenter
@@ -14,18 +15,23 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import org.patternfly.BreadcrumbStore
 import org.patternfly.DoubleIcon
 import org.patternfly.ItemsStore
+import org.patternfly.Severity
 import org.patternfly.SingleIcon
 import org.patternfly.Size
 import org.patternfly.TabStore
 import org.patternfly.TreeBuilder
 import org.patternfly.TreeItem
 import org.patternfly.TreeStore
+import org.patternfly.WithIdProvider
+import org.patternfly.alert
+import org.patternfly.alertDescription
 import org.patternfly.breadcrumb
 import org.patternfly.children
 import org.patternfly.classes
@@ -48,8 +54,13 @@ import org.patternfly.items
 import org.patternfly.layout
 import org.patternfly.modifier
 import org.patternfly.pageSection
+import org.patternfly.switch
 import org.patternfly.tabs
 import org.patternfly.textContent
+import org.patternfly.toolbar
+import org.patternfly.toolbarContent
+import org.patternfly.toolbarContentSection
+import org.patternfly.toolbarItem
 import org.patternfly.tree
 import org.patternfly.treeItem
 import org.patternfly.treeView
@@ -76,6 +87,11 @@ data class ResourceDetails(val resource: Resource) : ResourceState()
 class BrowsePresenter(private val dispatcher: Dispatcher) : Presenter<BrowseView> {
 
     private val idProvider: IdProvider<Resource, String> = { it.id }
+    private var address: String = ""
+    private var attribute: String? = null
+    private var operation: String? = null
+    private var capability: String? = null
+
     val breadcrumbStore: BreadcrumbStore<Resource> = BreadcrumbStore(idProvider)
     val treeStore: TreeStore<Resource> = TreeStore(idProvider)
     val tabStore: TabStore<ResourceProperty> = TabStore { it.key }
@@ -136,6 +152,13 @@ class BrowsePresenter(private val dispatcher: Dispatcher) : Presenter<BrowseView
         }
     }
 
+    override fun prepareFromRequest(place: PlaceRequest) {
+        address = place.params["address"] ?: "/"
+        attribute = place.params["attribute"]
+        operation = place.params["operation"]
+        capability = place.params["capability"]
+    }
+
     override fun show() {
         js(
             """
@@ -143,13 +166,6 @@ class BrowsePresenter(private val dispatcher: Dispatcher) : Presenter<BrowseView
             document.documentElement.style.setProperty("--mgb-browse-top--Height", height + "px");
             """
         )
-    }
-
-    override fun prepareFromRequest(place: PlaceRequest) {
-        val address = place.params["address"] ?: "/"
-        val attribute = place.params["attribute"]
-        val operation = place.params["operation"]
-        val capability = place.params["capability"]
         MainScope().launch {
             val subtree = dispatcher.subtree(address)
             val tree = tree<Resource> {
@@ -159,8 +175,8 @@ class BrowsePresenter(private val dispatcher: Dispatcher) : Presenter<BrowseView
             treeStore.update(tree)
             if (attribute != null || operation != null || capability != null) {
                 val (property, value) = when {
-                    attribute != null -> ATTRIBUTES to attribute
-                    operation != null -> OPERATIONS to operation
+                    attribute != null -> ATTRIBUTES to attribute!!
+                    operation != null -> OPERATIONS to operation!!
                     else -> CAPABILITIES to capability!!
                 }
                 resourceState.data.filterIsInstance<ResourceDetails>().take(1).collect {
@@ -249,6 +265,13 @@ class BrowseView(override val presenter: BrowsePresenter) : View, WithPresenter<
                             +("mgb-deprecated" `when` resource.deprecated)
                         }) {
                             if (resource.address == "/") +"Management Model" else +resource.name
+                            resource.deprecation?.let { deprecation ->
+                                // TODO turn this into a tooltip
+                                attr(
+                                    "title",
+                                    "Deprecated since ${deprecation.since}. Reason: ${deprecation.reason}"
+                                )
+                            }
                         }
                     }
                     fetchItems { treeItem ->
@@ -279,9 +302,25 @@ class BrowseView(override val presenter: BrowsePresenter) : View, WithPresenter<
                 textContent(baseClass = "mb-md".util()) {
                     p { presenter.treeStore.selected.map { it.unwrap().description }.asText() }
                 }
+                alert(Severity.WARNING, "Deprecated", inline = true) {
+                    showIf(presenter.treeStore.selected.map { it.unwrap().deprecated })
+                    alertDescription {
+                        p {
+                            presenter.treeStore.selected.map { it.unwrap().deprecation }.filterNotNull()
+                                .map { it.reason }
+                                .asText()
+                        }
+                        p {
+                            +"Since "
+                            presenter.treeStore.selected.map { it.unwrap().deprecation }.filterNotNull()
+                                .map { it.since }
+                                .asText()
+                        }
+                    }
+                }
                 tabs(presenter.tabStore) {
-                    hideIf(presenter.treeStore.selected.unwrap()) { it.singletonParent }
                     tabDisplay { +it.text }
+                    hideIf(presenter.treeStore.selected.unwrap()) { it.singletonParent }
                     items {
                         item(ATTRIBUTES) {
                             div(baseClass = "mt-lg".util()) {
@@ -302,37 +341,34 @@ class BrowseView(override val presenter: BrowsePresenter) : View, WithPresenter<
                                 showIf(presenter.resourceState.data) {
                                     it is ResourceDetails && it.resource.attributes.isNotEmpty()
                                 }
-                                dataTable(
-                                    presenter.attributesStore,
-                                    baseClass = "compact".modifier()
-                                ) {
-                                    dataTableColumns {
-                                        dataTableColumn("Name") {
-                                            headerClass("width-55".modifier())
-                                            cellDisplay { attribute ->
-                                                div(
-                                                    id = itemId(attribute),
-                                                    baseClass = "mgb-highlightable"
-                                                ) {
-                                                    domNode.dataset["attribute"] = attribute.name
-                                                    strong { +attribute.name }
-                                                }
-                                                attribute.description?.let {
-                                                    div { +it }
+                                div {
+                                    // TODO Toolbar to filter attributes by
+                                    //  - name
+                                    //  - storage
+                                    //  - access type
+                                    dataTable(
+                                        presenter.attributesStore,
+                                        baseClass = "compact".modifier()
+                                    ) {
+                                        dataTableColumns {
+                                            dataTableColumn("Name") {
+                                                headerClass("width-55".modifier())
+                                                cellDisplay { attribute ->
+                                                    attribute(this@dataTableColumn, attribute)
                                                 }
                                             }
-                                        }
-                                        dataTableColumn("Type") {
-                                            headerClass("width-15".modifier())
-                                            cellDisplay { attribute -> +attribute.type }
-                                        }
-                                        dataTableColumn("Storage") {
-                                            headerClass("width-15".modifier())
-                                            cellDisplay { attribute -> +(attribute.storage ?: "n/a") }
-                                        }
-                                        dataTableColumn("Access Type") {
-                                            headerClass("width-15".modifier())
-                                            cellDisplay { attribute -> +(attribute.accessType ?: "n/a") }
+                                            dataTableColumn("Type") {
+                                                headerClass("width-15".modifier())
+                                                cellDisplay { attribute -> +attribute.type }
+                                            }
+                                            dataTableColumn("Storage") {
+                                                headerClass("width-15".modifier())
+                                                cellDisplay { attribute -> +(attribute.storage ?: "n/a") }
+                                            }
+                                            dataTableColumn("Access Type") {
+                                                headerClass("width-15".modifier())
+                                                cellDisplay { attribute -> +(attribute.accessType ?: "n/a") }
+                                            }
                                         }
                                     }
                                 }
@@ -357,22 +393,32 @@ class BrowseView(override val presenter: BrowsePresenter) : View, WithPresenter<
                                 showIf(presenter.resourceState.data) {
                                     it is ResourceDetails && it.resource.operations.isNotEmpty()
                                 }
-                                dataTable(
-                                    presenter.operationsStore,
-                                    baseClass = "compact".modifier()
-                                ) {
-                                    dataTableColumns {
-                                        dataTableColumn("Name") {
-                                            cellDisplay { operation ->
-                                                div(
-                                                    id = itemId(operation),
-                                                    baseClass = "mgb-highlightable"
-                                                ) {
-                                                    domNode.dataset["operation"] = operation.name
-                                                    strong { +operation.name }
+                                div {
+                                    // TODO Toolbar to filter operations by
+                                    //  - name
+                                    //  - global / non-global
+                                    //  - configuration / runtime
+                                    dataTable(
+                                        presenter.operationsStore,
+                                        baseClass = "compact".modifier()
+                                    ) {
+                                        dataTableColumns {
+                                            dataTableColumn("Name") {
+                                                headerClass("width-35".modifier())
+                                                cellDisplay { operation ->
+                                                    operation(this@dataTableColumn, operation)
                                                 }
-                                                operation.description?.let {
-                                                    div { +it }
+                                            }
+                                            dataTableColumn("Parameter") {
+                                                headerClass("width-45".modifier())
+                                                cellDisplay { operation ->
+                                                    parameter(operation)
+                                                }
+                                            }
+                                            dataTableColumn("Result") {
+                                                headerClass("width-20".modifier())
+                                                cellDisplay { operation ->
+                                                    result(operation)
                                                 }
                                             }
                                         }
@@ -405,23 +451,8 @@ class BrowseView(override val presenter: BrowsePresenter) : View, WithPresenter<
                                 ) {
                                     dataTableColumns {
                                         dataTableColumn("Name") {
-                                            cellDisplay { capability ->
-                                                a(
-                                                    id = itemId(capability),
-                                                    baseClass = "mgb-highlightable"
-                                                ) {
-                                                    domNode.dataset["capability"] = capability.name
-                                                    href(
-                                                        "$CAPABILITY_BASE/${
-                                                            capability.name.replace(
-                                                                '.',
-                                                                '/'
-                                                            )
-                                                        }/capability.adoc"
-                                                    )
-                                                    target("capability")
-                                                    +capability.name
-                                                }
+                                            cellDisplay {
+                                                capability(this@dataTableColumn, it)
                                             }
                                         }
                                     }
@@ -432,20 +463,119 @@ class BrowseView(override val presenter: BrowsePresenter) : View, WithPresenter<
                 }
             }
         }
-/*
-        pageSection(
-            limitWidth = true,
-            baseClass = classes("light".modifier(), "overflow-scroll".modifier())
+    }
+
+    private fun RenderContext.attribute(idProvider: WithIdProvider<Attribute>, attribute: Attribute) {
+        div(
+            id = idProvider.itemId(attribute),
+            baseClass = classes {
+                +"mgb-highlightable"
+                +("mgb-deprecated" `when` attribute.deprecated)
+            }
         ) {
-            div(baseClass = "mgb-browse") {
-                div(baseClass = classes("mgb-browse-tree", "mgb-browse-scroll", "mr-md".util())) {
-                    // treeview
-                }
-                div(baseClass = classes("mgb-browse-resources", "mgb-browse-scroll")) {
-                    // resource
+            domNode.dataset["attribute"] = attribute.name
+            strong {
+                +attribute.name
+                attribute.deprecation?.let { deprecation ->
+                    // TODO turn this into a tooltip
+                    attr(
+                        "title",
+                        "Deprecated since ${deprecation.since}. Reason: ${deprecation.reason}"
+                    )
                 }
             }
         }
-*/
+        attribute.description?.let {
+            div { +it }
+        }
+    }
+
+    private fun RenderContext.operation(idProvider: WithIdProvider<Operation>, operation: Operation) {
+        div(
+            id = idProvider.itemId(operation),
+            baseClass = classes {
+                +"mgb-highlightable"
+                +("mgb-deprecated" `when` operation.deprecated)
+            }) {
+            domNode.dataset["operation"] = operation.name
+            strong {
+                +operation.name
+                operation.deprecation?.let { deprecation ->
+                    // TODO turn this into a tooltip
+                    attr(
+                        "title",
+                        "Deprecated since ${deprecation.since}. Reason: ${deprecation.reason}"
+                    )
+                }
+            }
+        }
+        operation.description?.let {
+            div { +it }
+        }
+    }
+
+    private fun RenderContext.parameter(operation: Operation) {
+        if (operation.parameters.isNotEmpty()) {
+            ul {
+                for (parameter in operation.parameters) {
+                    li {
+                        span(baseClass = classes {
+                            +("mgb-deprecated" `when` parameter.deprecated)
+                        }) {
+                            +parameter.name
+                            if (parameter.deprecated) {
+                                parameter.deprecation?.let { deprecation ->
+                                    // TODO turn this into a tooltip
+                                    attr(
+                                        "title",
+                                        "Deprecated since ${deprecation.since}. Reason: ${deprecation.reason}"
+                                    )
+                                }
+                            } else if (parameter.unit != null) {
+                                attr("title", parameter.unit)
+                            }
+                        }
+                        +": "
+                        // TODO Nested parameters
+                        +parameter.type
+                        if (parameter.valueType != null) {
+                            +"<${parameter.valueType}>"
+                        }
+                        br {}
+                        parameter.description?.let { +it }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun RenderContext.result(operation: Operation) {
+        operation.returnValue?.let {
+            div {
+                +it
+                if (operation.valueType != null) {
+                    +"<${operation.valueType}>"
+                }
+            }
+        }
+    }
+
+    private fun RenderContext.capability(idProvider: WithIdProvider<Capability>, capability: Capability) {
+        a(
+            id = idProvider.itemId(capability),
+            baseClass = "mgb-highlightable"
+        ) {
+            domNode.dataset["capability"] = capability.name
+            href(
+                "$CAPABILITY_BASE/${
+                    capability.name.replace(
+                        '.',
+                        '/'
+                    )
+                }/capability.adoc"
+            )
+            target("capability")
+            +capability.name
+        }
     }
 }

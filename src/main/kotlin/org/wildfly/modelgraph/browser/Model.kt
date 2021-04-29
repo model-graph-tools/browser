@@ -123,6 +123,7 @@ data class Operation(
     val description: String? = null,
     val readOnly: Boolean = false,
     val returnValue: String? = null,
+    val valueType: String? = null,
     val runtimeOnly: Boolean = false,
     override val deprecation: Deprecation? = null,
 
@@ -226,6 +227,15 @@ data class Version(
 ) : Model() {
 
     override val name: String = ""
+
+    fun ordinal(): Int {
+        var ordinal = 0
+        val numbers = intArrayOf(patch, minor, major)
+        for (i in numbers.indices) {
+            ordinal = ordinal or (numbers[i] shl i * 10)
+        }
+        return ordinal
+    }
 
     override fun toString(): String = "$major.$minor.$patch"
 }

@@ -11,10 +11,6 @@ const val ENDPOINT = "/mgtapi"
 
 class Dispatcher(private val registry: ItemsStore<Registration>) {
 
-    suspend fun registry(): List<Registration> = json.decodeFromString(
-        window.fetch("$ENDPOINT/registry").await().text().await()
-    )
-
     suspend fun children(address: String): List<Resource> = json.decodeFromString(
         window.fetch(
             buildString {
@@ -25,6 +21,34 @@ class Dispatcher(private val registry: ItemsStore<Registration>) {
                 append(encodeURIComponent(address))
             }
         ).await().text().await()
+    )
+
+    suspend fun deprecated(since: String? = null): Models = json.decodeFromString(window.fetch(
+        buildString {
+            append(ENDPOINT)
+            append("/management-model/deprecated/")
+            append(registry.current.selection.firstOrNull()?.identifier)
+            since?.let {
+                append("?since=")
+                append(since)
+            }
+        }
+    ).await().text().await())
+
+    suspend fun query(name: String): Models = json.decodeFromString(
+        window.fetch(
+            buildString {
+                append(ENDPOINT)
+                append("/management-model/query/")
+                append(registry.current.selection.firstOrNull()?.identifier)
+                append("?name=")
+                append(encodeURIComponent(name))
+            }
+        ).await().text().await()
+    )
+
+    suspend fun registry(): List<Registration> = json.decodeFromString(
+        window.fetch("$ENDPOINT/registry").await().text().await()
     )
 
     suspend fun resource(address: String): Resource = json.decodeFromString<Resource>(
@@ -64,14 +88,12 @@ class Dispatcher(private val registry: ItemsStore<Registration>) {
         ).await().text().await()
     )
 
-    suspend fun query(name: String): Models = json.decodeFromString(
+    suspend fun versions(): List<Version> = json.decodeFromString(
         window.fetch(
             buildString {
                 append(ENDPOINT)
-                append("/management-model/query/")
+                append("/versions/")
                 append(registry.current.selection.firstOrNull()?.identifier)
-                append("?name=")
-                append(encodeURIComponent(name))
             }
         ).await().text().await()
     )
