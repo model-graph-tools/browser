@@ -10,6 +10,7 @@ import dev.fritz2.mvp.View
 import dev.fritz2.mvp.ViewContent
 import dev.fritz2.mvp.WithPresenter
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import org.patternfly.ButtonVariation.control
@@ -24,6 +25,7 @@ import org.patternfly.dataListItem
 import org.patternfly.dataListRow
 import org.patternfly.dataListToggle
 import org.patternfly.dom.aria
+import org.patternfly.dom.hideIf
 import org.patternfly.emptyState
 import org.patternfly.emptyStateBody
 import org.patternfly.emptyStateNoResults
@@ -44,9 +46,9 @@ import org.wildfly.modelgraph.browser.QueryView.State.DATA_LIST
 import org.wildfly.modelgraph.browser.QueryView.State.INITIAL
 import org.wildfly.modelgraph.browser.QueryView.State.NO_RESULTS
 
-class QueryPresenter(private val dispatcher: Dispatcher) : Presenter<QueryView> {
+class QueryPresenter(private val dispatcher: Dispatcher, registry: Registry) : Presenter<QueryView> {
 
-    override val view: QueryView = QueryView(this)
+    override val view: QueryView = QueryView(this, registry)
     val store: ItemsStore<Model> = ItemsStore { it.id }
     val currentQuery: MutableStateFlow<String> = MutableStateFlow("")
     val query: Handler<String> = with(store) {
@@ -63,14 +65,19 @@ class QueryPresenter(private val dispatcher: Dispatcher) : Presenter<QueryView> 
     }
 }
 
-class QueryView(override val presenter: QueryPresenter) : View, WithPresenter<QueryPresenter> {
+class QueryView(
+    override val presenter: QueryPresenter,
+    private val registry: Registry
+) : View, WithPresenter<QueryPresenter> {
 
     enum class State { INITIAL, NO_RESULTS, DATA_LIST }
 
     val state: RootStore<State> = storeOf(INITIAL)
 
     override val content: ViewContent = {
+        noWildFly(registry)
         pageSection(sticky = TOP, baseClass = "light".modifier()) {
+            hideIf(registry.isEmpty())
             inputGroup {
                 inputFormControl(baseClass = "mgb-query-input") {
                     placeholder("Search for resources, attributes, operations and capabilities")
@@ -87,7 +94,10 @@ class QueryView(override val presenter: QueryPresenter) : View, WithPresenter<Qu
             }
         }
         pageSection(baseClass = classes("light".modifier(), "fill".modifier())) {
-            classMap(state.data.map { mapOf("display-none".util() to (it != INITIAL)) })
+            hideIf(registry.isEmpty()
+                .combine(state.data.map { it != INITIAL }) { noRegistry, notInitialState ->
+                    noRegistry || notInitialState
+                })
             emptyState(iconClass = "search".fas(), title = "Query") {
                 emptyStateBody {
                     p {
@@ -105,7 +115,10 @@ class QueryView(override val presenter: QueryPresenter) : View, WithPresenter<Qu
             }
         }
         pageSection(baseClass = classes("light".modifier(), "fill".modifier())) {
-            classMap(state.data.map { mapOf("display-none".util() to (it != NO_RESULTS)) })
+            hideIf(registry.isEmpty()
+                .combine(state.data.map { it != NO_RESULTS }) { noRegistry, resultsAvailable ->
+                    noRegistry || resultsAvailable
+                })
             emptyStateNoResults(body = {
                 +"No results found for '"
                 presenter.currentQuery.asText()
@@ -113,6 +126,10 @@ class QueryView(override val presenter: QueryPresenter) : View, WithPresenter<Qu
             })
         }
         pageSection {
+            hideIf(registry.isEmpty()
+                .combine(state.data.map { it != DATA_LIST }) { noRegistry, noDataList ->
+                    noRegistry || noDataList
+                })
             classMap(state.data.map { mapOf("display-none".util() to (it != DATA_LIST)) })
             toolbar {
                 toolbarContent {

@@ -54,13 +54,8 @@ import org.patternfly.items
 import org.patternfly.layout
 import org.patternfly.modifier
 import org.patternfly.pageSection
-import org.patternfly.switch
 import org.patternfly.tabs
 import org.patternfly.textContent
-import org.patternfly.toolbar
-import org.patternfly.toolbarContent
-import org.patternfly.toolbarContentSection
-import org.patternfly.toolbarItem
 import org.patternfly.tree
 import org.patternfly.treeItem
 import org.patternfly.treeView
@@ -84,7 +79,7 @@ sealed class ResourceState
 object NoResourceDetails : ResourceState()
 data class ResourceDetails(val resource: Resource) : ResourceState()
 
-class BrowsePresenter(private val dispatcher: Dispatcher) : Presenter<BrowseView> {
+class BrowsePresenter(private val dispatcher: Dispatcher, registry: Registry) : Presenter<BrowseView> {
 
     private val idProvider: IdProvider<Resource, String> = { it.id }
     private var address: String = ""
@@ -99,7 +94,7 @@ class BrowsePresenter(private val dispatcher: Dispatcher) : Presenter<BrowseView
     val attributesStore: ItemsStore<Attribute> = ItemsStore { it.id }
     val operationsStore: ItemsStore<Operation> = ItemsStore { it.id }
     val capabilitiesStore: ItemsStore<Capability> = ItemsStore { it.id }
-    override val view: BrowseView = BrowseView(this)
+    override val view: BrowseView = BrowseView(this, registry)
 
     override fun bind() {
         attributesStore.pageSize(Int.MAX_VALUE)
@@ -249,10 +244,15 @@ class BrowsePresenter(private val dispatcher: Dispatcher) : Presenter<BrowseView
     }
 }
 
-class BrowseView(override val presenter: BrowsePresenter) : View, WithPresenter<BrowsePresenter> {
+class BrowseView(
+    override val presenter: BrowsePresenter,
+    private val registry: Registry
+) : View, WithPresenter<BrowsePresenter> {
 
     override val content: ViewContent = {
+        noWildFly(registry)
         pageSection(baseClass = classes("light".modifier(), "grid".layout(), "gutter".modifier())) {
+            hideIf(registry.isEmpty())
             div(id = "mgb-browse-top", baseClass = classes("grid".layout("item"), "12-col".modifier())) {
                 breadcrumb(presenter.breadcrumbStore, noHomeLink = true) {
                     display { +it.name }

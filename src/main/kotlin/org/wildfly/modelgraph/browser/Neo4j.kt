@@ -4,19 +4,21 @@ import dev.fritz2.mvp.Presenter
 import dev.fritz2.mvp.View
 import dev.fritz2.mvp.ViewContent
 import kotlinx.coroutines.flow.map
-import org.patternfly.ItemsStore
+import org.patternfly.dom.hideIf
 import org.patternfly.modifier
 import org.patternfly.pageSection
 import org.patternfly.textContent
 import org.patternfly.title
 
-class Neo4jPresenter(registry: ItemsStore<Registration>) : Presenter<Neo4jView> {
+class Neo4jPresenter(registry: Registry) : Presenter<Neo4jView> {
     override val view: Neo4jView = Neo4jView(registry)
 }
 
-class Neo4jView(registry: ItemsStore<Registration>) : View {
+class Neo4jView(registry: Registry) : View {
     override val content: ViewContent = {
+        noWildFly(registry)
         pageSection(baseClass = "light".modifier()) {
+            hideIf(registry.isEmpty())
             textContent {
                 title { +"Neo4j Browser" }
                 p {

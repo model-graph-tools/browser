@@ -1,6 +1,5 @@
 package org.wildfly.modelgraph.browser
 
-import dev.fritz2.dom.html.Div
 import org.patternfly.DataListCell
 import org.patternfly.DataListContent
 import org.patternfly.badge
@@ -61,27 +60,6 @@ private fun DataListCell<Model>.capabilityCell(capability: Capability) {
     a {
         +capability.name
         href(browseCapability(capability.name).hash)
-    }
-}
-
-private fun Div.capabilityDescription(capability: Capability) {
-    +"Declared by "
-    if (capability.declaredBy.size == 1) {
-        a {
-            +capability.declaredBy.first()
-            href(browseResource(capability.declaredBy.first()).hash)
-        }
-    } else {
-        ul {
-            capability.declaredBy.forEach {
-                li {
-                    a {
-                        +it
-                        href(browseResource(it).hash)
-                    }
-                }
-            }
-        }
     }
 }
 

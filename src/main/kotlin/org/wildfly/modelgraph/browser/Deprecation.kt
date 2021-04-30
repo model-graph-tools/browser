@@ -19,6 +19,7 @@ import org.patternfly.dataListExpandableContent
 import org.patternfly.dataListItem
 import org.patternfly.dataListRow
 import org.patternfly.dataListToggle
+import org.patternfly.dom.hideIf
 import org.patternfly.modifier
 import org.patternfly.pageSection
 import org.patternfly.pagination
@@ -30,9 +31,12 @@ import org.patternfly.toolbarContent
 import org.patternfly.toolbarContentSection
 import org.patternfly.toolbarItem
 
-class DeprecationPresenter(private val dispatcher: Dispatcher) : Presenter<DeprecationView> {
+class DeprecationPresenter(
+    private val dispatcher: Dispatcher,
+    registry: Registry
+) : Presenter<DeprecationView> {
 
-    override val view: DeprecationView = DeprecationView(this)
+    override val view: DeprecationView = DeprecationView(this, registry)
 
     val modelStore: ItemsStore<Model> = ItemsStore { it.id }
     val versionStore: ItemsStore<Version> = ItemsStore { it.id }
@@ -59,16 +63,22 @@ class DeprecationPresenter(private val dispatcher: Dispatcher) : Presenter<Depre
     }
 }
 
-class DeprecationView(override val presenter: DeprecationPresenter) : View, WithPresenter<DeprecationPresenter> {
+class DeprecationView(
+    override val presenter: DeprecationPresenter,
+    private val registry: Registry
+) : View, WithPresenter<DeprecationPresenter> {
 
     override val content: ViewContent = {
+        noWildFly(registry)
         pageSection(baseClass = "light".modifier()) {
+            hideIf(registry.isEmpty())
             textContent {
                 title { +"Deprecated" }
                 p { +"List of deprecated attributes, operations and resources since a given management model version." }
             }
         }
         pageSection {
+            hideIf(registry.isEmpty())
             toolbar {
                 toolbarContent {
                     toolbarContentSection {

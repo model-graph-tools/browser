@@ -7,7 +7,6 @@ import dev.fritz2.mvp.placeRequest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import org.patternfly.ContextSelectorStore
-import org.patternfly.ItemsStore
 import org.patternfly.Size
 import org.patternfly.brand
 import org.patternfly.classes
@@ -31,7 +30,7 @@ import org.patternfly.pageMain
 import org.patternfly.pageSection
 import org.patternfly.unwrap
 
-fun RenderContext.skeleton(registry: ItemsStore<Registration>, placeManager: PlaceManager) {
+fun RenderContext.skeleton(registry: Registry, placeManager: PlaceManager) {
     val css = ContextSelectorStore<Registration>()
 
     // wire registry and context selector store
@@ -95,7 +94,7 @@ fun RenderContext.skeleton(registry: ItemsStore<Registration>, placeManager: Pla
     }
 }
 
-fun RenderContext.noWildFly(registry: ItemsStore<Registration>) {
+fun RenderContext.noWildFly(registry: Registry) {
     pageSection(baseClass = classes("light".modifier(), "fill".modifier())) {
         showIf(registry.data.map { it.all.isEmpty() })
         emptyState(iconClass = "ban".fas(), size = Size.LG, title = "No WildFly") {

@@ -4,12 +4,11 @@ import dev.fritz2.routing.encodeURIComponent
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 import kotlinx.serialization.decodeFromString
-import org.patternfly.ItemsStore
 
 const val CAPABILITY_BASE = "https://raw.githubusercontent.com/wildfly/wildfly-capabilities/master"
 const val ENDPOINT = "/mgtapi"
 
-class Dispatcher(private val registry: ItemsStore<Registration>) {
+class Dispatcher(private val registry: Registry) {
 
     suspend fun children(address: String): List<Resource> = json.decodeFromString(
         window.fetch(
