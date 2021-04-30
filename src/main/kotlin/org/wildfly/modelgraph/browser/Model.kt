@@ -213,6 +213,10 @@ data class Resource(
         }
         append(")")
     }
+
+    companion object {
+        val UNDEFINED = Resource("-1", "n/a", "Resource", "/", true)
+    }
 }
 
 @Serializable

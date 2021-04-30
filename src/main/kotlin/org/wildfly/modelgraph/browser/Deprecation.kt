@@ -6,9 +6,8 @@ import dev.fritz2.mvp.Presenter
 import dev.fritz2.mvp.View
 import dev.fritz2.mvp.ViewContent
 import dev.fritz2.mvp.WithPresenter
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import org.patternfly.ItemsStore
 import org.patternfly.badge
 import org.patternfly.dataList
@@ -33,16 +32,22 @@ import org.patternfly.toolbarItem
 
 class DeprecationPresenter(
     private val dispatcher: Dispatcher,
-    registry: Registry
+    private val registry: Registry
 ) : Presenter<DeprecationView> {
 
     override val view: DeprecationView = DeprecationView(this, registry)
 
+    var since: String? = null
     val modelStore: ItemsStore<Model> = ItemsStore { it.id }
     val versionStore: ItemsStore<Version> = ItemsStore { it.id }
 
-    var since: String? = null
-    val updateSince: Handler<String> = with(modelStore) {
+    private val updateVersions: Handler<Unit> = with(versionStore) {
+        handle { items ->
+            items.addAll(dispatcher.versions())
+        }
+    }
+
+    val updateDeprecations: Handler<String?> = with(modelStore) {
         handle { items, since ->
             this@DeprecationPresenter.since = since
             items.addAll(dispatcher.deprecated(since).models)
@@ -51,15 +56,17 @@ class DeprecationPresenter(
 
     override fun bind() {
         modelStore.pageSize(Int.MAX_VALUE)
-        MainScope().launch {
-            versionStore.addAll(dispatcher.versions())
+
+        with(registry) {
+            // update stores if a new WildFly version has been selected
+            selection.filter { it.isNotEmpty() }.map { } handledBy updateVersions
+            selection.filter { it.isNotEmpty() }.map { since } handledBy updateDeprecations
         }
     }
 
     override fun show() {
-        MainScope().launch {
-            modelStore.addAll(dispatcher.deprecated(since).models)
-        }
+        updateVersions()
+        updateDeprecations(since)
     }
 }
 
@@ -74,7 +81,18 @@ class DeprecationView(
             hideIf(registry.isEmpty())
             textContent {
                 title { +"Deprecated" }
-                p { +"List of deprecated attributes, operations and resources since a given management model version." }
+                p {
+                    +"List of deprecated attributes, operations and resources in "
+                    strong {
+                        registry.failSafeSelection().map { "${it.productName} ${it.productVersion}" }.asText()
+                    }
+                    +" which uses management model version "
+                    strong {
+                        registry.failSafeSelection().map { it.managementVersion }.asText()
+                    }
+                    +"."
+
+                }
             }
         }
         pageSection {
@@ -85,14 +103,14 @@ class DeprecationView(
                         toolbarItem {
                             selectFormControl {
                                 inlineStyle("width: 10em")
-                                changes.values() handledBy presenter.updateSince
+                                changes.values() handledBy presenter.updateDeprecations
                                 option {
                                     selected(presenter.since == null)
                                     value("")
                                     +"All deprecations"
                                 }
                                 presenter.versionStore.data.map { items ->
-                                    items.all.sortedBy { it.ordinal() }.reversed()
+                                    items.all.sortedBy { it.ordinal() }
                                 }.renderEach { version ->
                                     option {
                                         selected(presenter.since == version.toString())

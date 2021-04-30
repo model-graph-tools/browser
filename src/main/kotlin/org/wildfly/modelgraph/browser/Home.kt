@@ -41,23 +41,27 @@ class HomeView(registry: Registry) : View {
                         cardTitle { +"${registration.productName} ${registration.productVersion}" }
                         cardBody { +"Management model ${registration.managementVersion}" }
                         WILDFLY_LINKS[registration.identifier]?.let { (releaseNotes, documentation) ->
-                            if (releaseNotes.isNotEmpty() && documentation.isNotEmpty()) {
+                            if (releaseNotes.isNotEmpty() || documentation.isNotEmpty()) {
                                 cardFooter {
                                     ul(baseClass = "font-size-sm".util()) {
-                                        li {
-                                            icon("bullhorn".fas(), baseClass = "mr-sm".util())
-                                            a {
-                                                +"Release notes"
-                                                href(releaseNotes)
-                                                target("release_notes")
+                                        if (releaseNotes.isNotEmpty()) {
+                                            li {
+                                                icon("bullhorn".fas(), baseClass = "mr-sm".util())
+                                                a {
+                                                    +"Release notes"
+                                                    href(releaseNotes)
+                                                    target("release_notes")
+                                                }
                                             }
                                         }
-                                        li {
-                                            icon("book".fas(), baseClass = "mr-sm".util())
-                                            a {
-                                                +"Documentation"
-                                                href(documentation)
-                                                target("documentation")
+                                        if (documentation.isNotEmpty()) {
+                                            li {
+                                                icon("book".fas(), baseClass = "mr-sm".util())
+                                                a {
+                                                    +"Documentation"
+                                                    href(documentation)
+                                                    target("documentation")
+                                                }
                                             }
                                         }
                                     }

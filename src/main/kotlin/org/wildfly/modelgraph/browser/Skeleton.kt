@@ -33,7 +33,7 @@ import org.patternfly.unwrap
 fun RenderContext.skeleton(registry: Registry, placeManager: PlaceManager) {
     val css = ContextSelectorStore<Registration>()
 
-    // wire registry and context selector store
+    // wire registry and context selector store (css)
     with(registry) {
         // registry:update -> css:update
         data.map { items ->
@@ -68,7 +68,6 @@ fun RenderContext.skeleton(registry: Registry, placeManager: PlaceManager) {
                 }
             }
             horizontalNavigation(placeManager.router) {
-                hideIf(registry.data.map { it.all.isEmpty() })
                 items {
                     item(placeRequest(BROWSE), "Browse")
                     item(placeRequest(QUERY), "Query")
@@ -79,7 +78,7 @@ fun RenderContext.skeleton(registry: Registry, placeManager: PlaceManager) {
             pageHeaderTools {
                 pageHeaderToolsGroup {
                     pageHeaderToolsItem {
-                        hideIf(registry.data.map { it.all.isEmpty() })
+                        hideIf(registry.isEmpty())
                         contextSelector(css)
                     }
                     pageHeaderToolsItem {
@@ -96,7 +95,7 @@ fun RenderContext.skeleton(registry: Registry, placeManager: PlaceManager) {
 
 fun RenderContext.noWildFly(registry: Registry) {
     pageSection(baseClass = classes("light".modifier(), "fill".modifier())) {
-        showIf(registry.data.map { it.all.isEmpty() })
+        showIf(registry.isEmpty())
         emptyState(iconClass = "ban".fas(), size = Size.LG, title = "No WildFly") {
             emptyStateBody {
                 p {

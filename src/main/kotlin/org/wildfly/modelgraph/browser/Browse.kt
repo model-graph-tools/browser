@@ -1,5 +1,6 @@
 package org.wildfly.modelgraph.browser
 
+import dev.fritz2.binding.Handler
 import dev.fritz2.binding.RootStore
 import dev.fritz2.binding.storeOf
 import dev.fritz2.dom.html.RenderContext
@@ -13,6 +14,7 @@ import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.filterNotNull
@@ -67,7 +69,7 @@ import org.wildfly.modelgraph.browser.ResourceProperty.CAPABILITIES
 import org.wildfly.modelgraph.browser.ResourceProperty.OPERATIONS
 
 const val HIGHLIGHT_TIMEOUT = 2000L
-const val UI_TIMEOUT = 333L
+const val UI_TIMEOUT = 666L
 
 enum class ResourceProperty(val key: String, val text: String) {
     ATTRIBUTES("attribute", "Attributes"),
@@ -79,13 +81,18 @@ sealed class ResourceState
 object NoResourceDetails : ResourceState()
 data class ResourceDetails(val resource: Resource) : ResourceState()
 
-class BrowsePresenter(private val dispatcher: Dispatcher, registry: Registry) : Presenter<BrowseView> {
+class BrowsePresenter(
+    private val dispatcher: Dispatcher,
+    private val registry: Registry
+) : Presenter<BrowseView> {
 
     private val idProvider: IdProvider<Resource, String> = { it.id }
     private var address: String = ""
     private var attribute: String? = null
     private var operation: String? = null
     private var capability: String? = null
+
+    override val view: BrowseView = BrowseView(this, registry)
 
     val breadcrumbStore: BreadcrumbStore<Resource> = BreadcrumbStore(idProvider)
     val treeStore: TreeStore<Resource> = TreeStore(idProvider)
@@ -94,12 +101,27 @@ class BrowsePresenter(private val dispatcher: Dispatcher, registry: Registry) : 
     val attributesStore: ItemsStore<Attribute> = ItemsStore { it.id }
     val operationsStore: ItemsStore<Operation> = ItemsStore { it.id }
     val capabilitiesStore: ItemsStore<Capability> = ItemsStore { it.id }
-    override val view: BrowseView = BrowseView(this, registry)
+
+    val updateTree: Handler<Unit> = with(treeStore) {
+        handle {
+            val subtree = dispatcher.subtree("/")
+            tree {
+                initialSelection = { true }
+                resourceItem(subtree, "/")
+            }
+        }
+    }
 
     override fun bind() {
         attributesStore.pageSize(Int.MAX_VALUE)
         operationsStore.pageSize(Int.MAX_VALUE)
         capabilitiesStore.pageSize(Int.MAX_VALUE)
+
+        with(registry) {
+            // update tree if a new WildFly version has been selected
+            selection.filter { it.isNotEmpty() }.map { } handledBy updateTree
+
+        }
 
         with(breadcrumbStore) {
             // breadcrumb:click -> treeItem:show
@@ -155,12 +177,14 @@ class BrowsePresenter(private val dispatcher: Dispatcher, registry: Registry) : 
     }
 
     override fun show() {
-        js(
-            """
+        if (document.getElementById("mgb-browse-top") != null) {
+            js(
+                """
             var height = document.getElementById("mgb-browse-top").offsetHeight;
             document.documentElement.style.setProperty("--mgb-browse-top--Height", height + "px");
             """
-        )
+            )
+        }
         MainScope().launch {
             val subtree = dispatcher.subtree(address)
             val tree = tree<Resource> {

@@ -46,11 +46,16 @@ import org.wildfly.modelgraph.browser.QueryView.State.DATA_LIST
 import org.wildfly.modelgraph.browser.QueryView.State.INITIAL
 import org.wildfly.modelgraph.browser.QueryView.State.NO_RESULTS
 
-class QueryPresenter(private val dispatcher: Dispatcher, registry: Registry) : Presenter<QueryView> {
+class QueryPresenter(
+    private val dispatcher: Dispatcher,
+    private val registry: Registry
+) : Presenter<QueryView> {
 
     override val view: QueryView = QueryView(this, registry)
+
     val store: ItemsStore<Model> = ItemsStore { it.id }
     val currentQuery: MutableStateFlow<String> = MutableStateFlow("")
+
     val query: Handler<String> = with(store) {
         handle { items, name ->
             currentQuery.value = name
@@ -61,6 +66,15 @@ class QueryPresenter(private val dispatcher: Dispatcher, registry: Registry) : P
                 view.state.update(DATA_LIST)
             }
             items.addAll(models.models)
+        }
+    }
+
+    override fun bind() {
+        store.pageSize(Int.MAX_VALUE)
+
+        with(registry) {
+            // update query if a new WildFly version has been selected
+            selection.filter { it.isNotEmpty() }.map { currentQuery.value } handledBy query
         }
     }
 }
@@ -80,7 +94,11 @@ class QueryView(
             hideIf(registry.isEmpty())
             inputGroup {
                 inputFormControl(baseClass = "mgb-query-input") {
-                    placeholder("Search for resources, attributes, operations and capabilities")
+                    placeholder(
+                        registry.failSafeSelection().map {
+                            "Search for resources, attributes, operations and capabilities in ${it.productName} ${it.productVersion}"
+                        }
+                    )
                     type("search")
                     value(presenter.currentQuery)
                     aria["invalid"] = false

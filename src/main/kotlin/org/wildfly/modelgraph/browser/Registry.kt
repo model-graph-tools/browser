@@ -1,6 +1,7 @@
 package org.wildfly.modelgraph.browser
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import org.patternfly.ItemsStore
@@ -67,6 +68,10 @@ val WILDFLY_LINKS: Map<String, Links> = mapOf(
 )
 
 fun Registry.isEmpty(): Flow<Boolean> = this.data.map { it.all.isEmpty() }
+
+fun Registry.failSafeSelection(): Flow<Registration> = this.data
+    .filter { it.all.isNotEmpty() && it.selection.isNotEmpty() }
+    .map { it.selection.first() }
 
 @Serializable
 data class Registration(
