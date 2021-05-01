@@ -72,6 +72,7 @@ fun RenderContext.skeleton(registry: Registry, placeManager: PlaceManager) {
                     item(placeRequest(BROWSE), "Browse")
                     item(placeRequest(QUERY), "Query")
                     item(placeRequest(DEPRECATION), "Deprecation")
+                    item(placeRequest(DIFF), "Diff")
                     item(placeRequest(NEO4J), "Neo4j")
                 }
             }

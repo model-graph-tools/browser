@@ -23,6 +23,7 @@ internal object CDIInstance : CDI {
         Presenter.register(HOME) { HomePresenter(registry) }
         Presenter.register(QUERY) { QueryPresenter(dispatcher, registry) }
         Presenter.register(DEPRECATION) { DeprecationPresenter(dispatcher, registry) }
+        Presenter.register(DIFF) { DiffPresenter(dispatcher, registry) }
         Presenter.register(NEO4J) { Neo4jPresenter(registry) }
     }
 

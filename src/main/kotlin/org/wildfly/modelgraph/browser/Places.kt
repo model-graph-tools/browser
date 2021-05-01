@@ -7,6 +7,7 @@ const val BROWSE = "browse"
 const val HOME = "home"
 const val QUERY = "query"
 const val DEPRECATION = "deprecation"
+const val DIFF = "diff"
 const val NEO4J = "neo4j"
 
 fun browseAttribute(address: String, attribute: String): PlaceRequest =
