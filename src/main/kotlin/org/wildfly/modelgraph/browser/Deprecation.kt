@@ -1,6 +1,8 @@
 package org.wildfly.modelgraph.browser
 
 import dev.fritz2.binding.Handler
+import dev.fritz2.binding.RootStore
+import dev.fritz2.binding.storeOf
 import dev.fritz2.dom.values
 import dev.fritz2.mvp.Presenter
 import dev.fritz2.mvp.View
@@ -39,12 +41,10 @@ class DeprecationPresenter(
 
     var since: String? = null
     val modelStore: ItemsStore<Model> = ItemsStore { it.id }
-    val versionStore: ItemsStore<Version> = ItemsStore { it.id }
+    val sinceValues: RootStore<List<Version>> = storeOf(listOf())
 
-    private val updateVersions: Handler<Unit> = with(versionStore) {
-        handle { items ->
-            items.addAll(dispatcher.versions())
-        }
+    private val updateVersions: Handler<Unit> = with(sinceValues) {
+        handle { dispatcher.versions() }
     }
 
     val updateDeprecations: Handler<String?> = with(modelStore) {
@@ -86,11 +86,11 @@ class DeprecationView(
                     strong {
                         registry.failSafeSelection().map { "${it.productName} ${it.productVersion}" }.asText()
                     }
-                    +" which uses management model version "
+                    +" ( management model version "
                     strong {
                         registry.failSafeSelection().map { it.managementVersion }.asText()
                     }
-                    +"."
+                    +")."
 
                 }
             }
@@ -109,8 +109,8 @@ class DeprecationView(
                                     value("")
                                     +"All deprecations"
                                 }
-                                presenter.versionStore.data.map { items ->
-                                    items.all.sortedBy { it.ordinal() }
+                                presenter.sinceValues.data.map { versions ->
+                                    versions.sortedBy { it.ordinal() }
                                 }.renderEach { version ->
                                     option {
                                         selected(presenter.since == version.toString())

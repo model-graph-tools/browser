@@ -67,6 +67,14 @@
     text-decoration: line-through;
 }
 
+.mgb-diff-code__collapsed {
+    width: 3%;
+}
+
+.mgb-diff-code__collapsed .pf-c-code-block__pre {
+    display: none;
+}
+
 .mgb-highlight {
     background-color: var(--pf-global--palette--gold-100);
 }
@@ -79,7 +87,7 @@
     font-weight: var(--pf-global--FontWeight--bold);
 }
 
-.mgb-query-input {
+.mgb-xl-input {
     --pf-c-form-control--FontSize: var(--pf-global--FontSize--xl);
 }
 

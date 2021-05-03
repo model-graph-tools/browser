@@ -1,7 +1,9 @@
 package org.wildfly.modelgraph.browser
 
+import dev.fritz2.binding.EmittingHandler
 import dev.fritz2.binding.Handler
 import dev.fritz2.binding.RootStore
+import dev.fritz2.binding.Store
 import dev.fritz2.binding.storeOf
 import dev.fritz2.dom.html.Div
 import dev.fritz2.dom.values
@@ -9,7 +11,6 @@ import dev.fritz2.mvp.Presenter
 import dev.fritz2.mvp.View
 import dev.fritz2.mvp.ViewContent
 import dev.fritz2.mvp.WithPresenter
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -41,7 +42,6 @@ import org.patternfly.toolbar
 import org.patternfly.toolbarContent
 import org.patternfly.toolbarContentSection
 import org.patternfly.toolbarItem
-import org.patternfly.util
 import org.wildfly.modelgraph.browser.QueryView.State.DATA_LIST
 import org.wildfly.modelgraph.browser.QueryView.State.INITIAL
 import org.wildfly.modelgraph.browser.QueryView.State.NO_RESULTS
@@ -54,12 +54,19 @@ class QueryPresenter(
     override val view: QueryView = QueryView(this, registry)
 
     val store: ItemsStore<Model> = ItemsStore { it.id }
-    val currentQuery: MutableStateFlow<String> = MutableStateFlow("")
+    val query: Store<String> = storeOf("")
 
-    val query: Handler<String> = with(store) {
-        handle { items, name ->
-            currentQuery.value = name
-            val models = dispatcher.query(name)
+    val updateAndEmitQuery: EmittingHandler<String, String> = with(query) {
+        handleAndEmit { _, value ->
+            emit(value)
+            value
+        }
+    }
+
+    private val executeQuery: Handler<String> = with(store) {
+        handle { items, value ->
+            console.log("Query using '$value'")
+            val models = dispatcher.query(value)
             if (models.size == 0) {
                 view.state.update(NO_RESULTS)
             } else {
@@ -72,9 +79,14 @@ class QueryPresenter(
     override fun bind() {
         store.pageSize(Int.MAX_VALUE)
 
+        with(query) {
+            // connect the two handlers
+            updateAndEmitQuery.filter { it.isNotEmpty() } handledBy executeQuery
+        }
+
         with(registry) {
-            // update query if a new WildFly version has been selected
-            selection.filter { it.isNotEmpty() }.map { currentQuery.value } handledBy query
+            // execute query if a new WildFly version has been selected
+            selection.filter { it.isNotEmpty() }.map { query.current }.filter { it.isNotEmpty() } handledBy executeQuery
         }
     }
 }
@@ -86,25 +98,19 @@ class QueryView(
 
     enum class State { INITIAL, NO_RESULTS, DATA_LIST }
 
-    val state: RootStore<State> = storeOf(INITIAL)
+    val state: Store<State> = storeOf(INITIAL)
 
     override val content: ViewContent = {
         noWildFly(registry)
         pageSection(sticky = TOP, baseClass = "light".modifier()) {
             hideIf(registry.isEmpty())
             inputGroup {
-                inputFormControl(baseClass = "mgb-query-input") {
-                    placeholder(
-                        registry.failSafeSelection().map {
-                            "Search for resources, attributes, operations and capabilities in ${it.productName} ${it.productVersion}"
-                        }
-                    )
+                inputFormControl(baseClass = "mgb-xl-input") {
+                    placeholder("Search for resources, attributes, operations and capabilities.")
                     type("search")
-                    value(presenter.currentQuery)
+                    value(presenter.query.data)
                     aria["invalid"] = false
-                    changes.values()
-                        .filter { it.isNotEmpty() }
-                        .handledBy(presenter.query)
+                    changes.values() handledBy presenter.updateAndEmitQuery
                 }
                 pushButton(control) {
                     icon("search".fas())
@@ -118,17 +124,7 @@ class QueryView(
                 })
             emptyState(iconClass = "search".fas(), title = "Query") {
                 emptyStateBody {
-                    p {
-                        +"Use this view to search for "
-                        i { +"attributes" }
-                        +", "
-                        i { +"operations" }
-                        +", "
-                        i { +"resources" }
-                        +" and "
-                        i { +"capabilities" }
-                        +"."
-                    }
+                    p { +"Search for resources, attributes, operations and capabilities." }
                 }
             }
         }
@@ -139,7 +135,7 @@ class QueryView(
                 })
             emptyStateNoResults(body = {
                 +"No results found for '"
-                presenter.currentQuery.asText()
+                presenter.query.data.asText()
                 +"'. Please try another query."
             })
         }
@@ -148,7 +144,6 @@ class QueryView(
                 .combine(state.data.map { it != DATA_LIST }) { noRegistry, noDataList ->
                     noRegistry || noDataList
                 })
-            classMap(state.data.map { mapOf("display-none".util() to (it != DATA_LIST)) })
             toolbar {
                 toolbarContent {
                     toolbarContentSection {

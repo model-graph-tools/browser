@@ -4,9 +4,25 @@ import dev.fritz2.routing.encodeURIComponent
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import org.w3c.fetch.Headers
+import org.w3c.fetch.RequestInit
 
 const val CAPABILITY_BASE = "https://raw.githubusercontent.com/wildfly/wildfly-capabilities/master"
 const val ENDPOINT = "/mgtapi"
+
+val json = Json {
+    classDiscriminator = "modelType"
+    ignoreUnknownKeys = true
+}
+
+val jsonPrettyPrint = Json {
+    prettyPrint = true
+}
 
 class Dispatcher(private val registry: Registry) {
 
@@ -36,6 +52,22 @@ class Dispatcher(private val registry: Registry) {
                 }
             }
         ).await().text().await())
+    }
+
+    suspend fun diff(address: String, from: String, to: String): JsonArray = failSafeFetch(JsonArray(emptyList())) {
+        json.parseToJsonElement(
+            window.fetch(
+                buildString {
+                    append(ENDPOINT)
+                    append("/diff?address=")
+                    append(encodeURIComponent(address))
+                    append("&from=")
+                    append(encodeURIComponent(from))
+                    append("&to=")
+                    append(encodeURIComponent(to))
+                }
+            ).await().text().await()
+        ).jsonArray
     }
 
     suspend fun query(name: String): Models = failSafeRegistry(Models()) {
@@ -84,6 +116,25 @@ class Dispatcher(private val registry: Registry) {
             }
         }
     }
+
+    suspend fun resourceForDiff(identifier: String, address: String): JsonObject =
+        failSafeFetch(JsonObject(emptyMap())) {
+            val requestInit = RequestInit().apply {
+                headers = Headers().apply { append("mgt-diff", "true") }
+            }
+            json.parseToJsonElement(
+                window.fetch(
+                    buildString {
+                        append(ENDPOINT)
+                        append("/resources/resource/")
+                        append(identifier)
+                        append("?address=")
+                        append(encodeURIComponent(address))
+                    },
+                    requestInit
+                ).await().text().await()
+            ).jsonObject
+        }
 
     suspend fun subtree(address: String): Resource = failSafeRegistry(Resource.UNDEFINED) {
         json.decodeFromString(

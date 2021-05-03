@@ -2,14 +2,8 @@ package org.wildfly.modelgraph.browser
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 
 const val SINGLETON_PARENT_TYPE: String = "SingletonParentResource"
-
-val json = Json {
-    classDiscriminator = "modelType"
-    ignoreUnknownKeys = true
-}
 
 interface Typed {
     val type: String
