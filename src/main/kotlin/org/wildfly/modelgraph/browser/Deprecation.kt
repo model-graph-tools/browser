@@ -86,7 +86,7 @@ class DeprecationView(
                     strong {
                         registry.failSafeSelection().map { "${it.productName} ${it.productVersion}" }.asText()
                     }
-                    +" ( management model version "
+                    +" (management model version "
                     strong {
                         registry.failSafeSelection().map { it.managementVersion }.asText()
                     }
