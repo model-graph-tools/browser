@@ -8,7 +8,7 @@ server {
     server_name mgt-browser;
 
     gzip on;
-    gzip_disable "msie6";
+    gzip_disable 'msie6';
 
     gzip_vary on;
     gzip_proxied any;
@@ -24,9 +24,28 @@ server {
         index index.html index.htm;
         expires -1;
         try_files $uri $uri/ /index.html;
-        add_header Access-Control-Allow-Origin "*";
-        add_header Access-Control-Allow-Methods "*";
-        add_header Access-Control-Allow-Headers "*";
+
+        if ($request_method = 'OPTIONS') {
+          add_header 'Access-Control-Allow-Origin' '*';
+          add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+          add_header 'Access-Control-Allow-Headers' '*';
+          add_header 'Access-Control-Max-Age' 1728000;
+          add_header 'Content-Type' 'text/plain; charset=utf-8';
+          add_header 'Content-Length' 0;
+          return 204;
+       }
+       if ($request_method = 'POST') {
+          add_header 'Access-Control-Allow-Origin' '*';
+          add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+          add_header 'Access-Control-Allow-Headers' '*';
+          add_header 'Access-Control-Expose-Headers' '*';
+       }
+       if ($request_method = 'GET') {
+          add_header 'Access-Control-Allow-Origin' '*';
+          add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+          add_header 'Access-Control-Allow-Headers' '*';
+          add_header 'Access-Control-Expose-Headers' '*';
+       }
     }
 
     location /mgtapi {
@@ -37,12 +56,12 @@ server {
     location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm|htc)$ {
         expires 1M;
         access_log off;
-        add_header Cache-Control "public";
+        add_header Cache-Control 'public';
     }
 
     location ~* \.(?:css|js)$ {
         expires 1y;
         access_log off;
-        add_header Cache-Control "public";
+        add_header Cache-Control 'public';
     }
 }
