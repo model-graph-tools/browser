@@ -10,7 +10,7 @@ import org.patternfly.util
 
 fun DataListContent<Model>.typeCell(model: Model) {
     dataListCell(baseClass = "no-fill".modifier()) {
-        badge(baseClass = "mgb-${model.modelType.toLowerCase()}") {
+        badge(baseClass = "mgb-${model.modelType.lowercase()}") {
             read(false)
             attr("title", model.modelType)
         }

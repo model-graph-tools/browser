@@ -1,6 +1,6 @@
 plugins {
-    kotlin("js") version "1.4.32"
-    kotlin("plugin.serialization") version "1.4.32"
+    kotlin("js") version "1.5.0"
+    kotlin("plugin.serialization") version "1.5.0"
 }
 
 group = "org.wildfly.modelgraph"
