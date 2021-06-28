@@ -1,6 +1,6 @@
 plugins {
-    kotlin("js") version "1.5.0"
-    kotlin("plugin.serialization") version "1.5.0"
+    kotlin("js") version "1.5.10"
+    kotlin("plugin.serialization") version "1.5.10"
 }
 
 group = "org.wildfly.modelgraph"
@@ -11,7 +11,7 @@ object Versions {
     const val fritz2 = "0.9.2"
     const val mvp = "0.3.0"
     const val patternflyFritz2 = "0.3.0-SNAPSHOT"
-    const val serialization = "1.1.0"
+    const val serialization = "1.2.1"
 
     // NPM (dev) dependencies
     const val fileLoader = "6.2.0"
