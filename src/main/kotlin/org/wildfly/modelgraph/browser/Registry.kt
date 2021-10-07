@@ -9,7 +9,7 @@ import org.patternfly.ItemsStore
 typealias Registry = ItemsStore<Registration>
 
 val WILDFLY_LINKS: Map<String, Links> = mapOf(
-    "wildfly-full-25.0.0.Final-mgt-17.0.1" to Links(
+    "wildfly-full-25.0.0.Final-mgt-18.0.0" to Links(
         "https://www.wildfly.org/news/2021/10/05/WildFly25-Final-Released/",
         "https://docs.wildfly.org/25/"
     ),
