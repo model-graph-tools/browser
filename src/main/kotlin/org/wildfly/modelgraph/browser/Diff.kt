@@ -18,10 +18,10 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import org.patternfly.ButtonVariation.plain
 import org.patternfly.Sticky.TOP
+import org.patternfly.aria
 import org.patternfly.classes
 import org.patternfly.clickButton
 import org.patternfly.component
-import org.patternfly.dom.aria
 import org.patternfly.dom.hideIf
 import org.patternfly.emptyState
 import org.patternfly.emptyStateBody

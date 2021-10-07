@@ -2,7 +2,6 @@ package org.wildfly.modelgraph.browser
 
 import dev.fritz2.binding.EmittingHandler
 import dev.fritz2.binding.Handler
-import dev.fritz2.binding.RootStore
 import dev.fritz2.binding.Store
 import dev.fritz2.binding.storeOf
 import dev.fritz2.dom.html.Div
@@ -17,6 +16,7 @@ import kotlinx.coroutines.flow.map
 import org.patternfly.ButtonVariation.control
 import org.patternfly.ItemsStore
 import org.patternfly.Sticky.TOP
+import org.patternfly.aria
 import org.patternfly.classes
 import org.patternfly.dataList
 import org.patternfly.dataListContent
@@ -25,7 +25,6 @@ import org.patternfly.dataListExpandableContent
 import org.patternfly.dataListItem
 import org.patternfly.dataListRow
 import org.patternfly.dataListToggle
-import org.patternfly.dom.aria
 import org.patternfly.dom.hideIf
 import org.patternfly.emptyState
 import org.patternfly.emptyStateBody
@@ -42,9 +41,7 @@ import org.patternfly.toolbar
 import org.patternfly.toolbarContent
 import org.patternfly.toolbarContentSection
 import org.patternfly.toolbarItem
-import org.wildfly.modelgraph.browser.QueryView.State.DATA_LIST
-import org.wildfly.modelgraph.browser.QueryView.State.INITIAL
-import org.wildfly.modelgraph.browser.QueryView.State.NO_RESULTS
+import org.wildfly.modelgraph.browser.QueryView.State.*
 
 class QueryPresenter(
     private val dispatcher: Dispatcher,
