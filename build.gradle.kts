@@ -54,3 +54,10 @@ kotlin {
         binaries.executable()
     }
 }
+
+// workaround for https://github.com/webpack/webpack-cli/issues/2990
+rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin> {
+    rootProject.the<org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension>().apply {
+        resolution("@webpack-cli/serve", "1.5.2")
+    }
+}
