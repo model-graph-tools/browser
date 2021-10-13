@@ -1,36 +1,31 @@
+@file:Suppress("UnstableApiUsage")
+
+// https://youtrack.jetbrains.com/issue/KTIJ-19369#focus=Comments-27-5181027.0-0
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("js") version "1.5.31"
-    kotlin("plugin.serialization") version "1.5.30"
+    alias(libs.plugins.js)
+    alias(libs.plugins.serialization)
 }
 
 group = "org.wildfly.modelgraph"
 version = "0.0.1"
 
-object Versions {
-    // dependencies
-    const val fritz2 = "0.12"
-    const val mvp = "0.3.0"
-    const val patternflyFritz2 = "0.3.0-SNAPSHOT"
-    const val serialization = "1.3.0"
-
-    // NPM (dev) dependencies
-    const val fileLoader = "6.2.0"
-    const val patternfly = "4"
-}
+val repositories = arrayOf(
+    "https://oss.sonatype.org/content/repositories/snapshots/",
+    "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+)
 
 repositories {
     mavenLocal()
     mavenCentral()
-    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+    repositories.forEach { maven(it) }
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.serialization}")
-    implementation("dev.fritz2:core:${Versions.fritz2}")
-    implementation("dev.fritz2:mvp:${Versions.mvp}")
-    implementation("org.patternfly:patternfly-fritz2:${Versions.patternflyFritz2}")
-    implementation(npm("@patternfly/patternfly", Versions.patternfly))
-    implementation(devNpm("file-loader", Versions.fileLoader))
+    implementation(libs.bundles.fritz2)
+    implementation(libs.serialization.json)
+    implementation(npm("@patternfly/patternfly", libs.versions.patternFly.get()))
+    implementation(devNpm("file-loader", libs.versions.fileLoader.get()))
 }
 
 kotlin {
