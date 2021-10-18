@@ -33,7 +33,6 @@ import org.patternfly.TreeItem
 import org.patternfly.TreeStore
 import org.patternfly.WithIdProvider
 import org.patternfly.alert
-import org.patternfly.alertDescription
 import org.patternfly.breadcrumb
 import org.patternfly.children
 import org.patternfly.classes
@@ -326,9 +325,12 @@ class BrowseView(
                 textContent(baseClass = "mb-md".util()) {
                     p { presenter.treeStore.selected.map { it.unwrap().description }.asText() }
                 }
-                alert(Severity.WARNING, "Deprecated", inline = true) {
+                alert {
                     showIf(presenter.treeStore.selected.map { it.unwrap().deprecated })
-                    alertDescription {
+                    inline(true)
+                    severity(Severity.WARNING)
+                    title("Deprecated")
+                    content {
                         p {
                             presenter.treeStore.selected.map { it.unwrap().deprecation }.filterNotNull()
                                 .map { it.reason }
