@@ -99,7 +99,7 @@ class QueryView(
 
     override val content: ViewContent = {
         noWildFly(registry)
-        pageSection(sticky = TOP, baseClass = "light".modifier()) {
+        pageSection(baseClass = classes("sticky-top".modifier(), "light".modifier())) {
             hideIf(registry.isEmpty())
             inputGroup {
                 inputFormControl(baseClass = "mgb-xl-input") {

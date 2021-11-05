@@ -134,17 +134,18 @@ class DeprecationView(
                             }
                             dataListContent {
                                 dataListCell(baseClass = "no-fill".modifier()) {
+                                    // TODO replace with label
                                     badge {
                                         read(false)
                                         attr("title", "Deprecated since")
-                                        value(
-                                            when (model) {
-                                                is Attribute -> model.deprecation?.since?.toString() ?: "n/a"
-                                                is Operation -> model.deprecation?.since?.toString() ?: "n/a"
-                                                is Resource -> model.deprecation?.since?.toString() ?: "n/a"
-                                                else -> "n/a"
-                                            }
-                                        )
+//                                        value(
+//                                            when (model) {
+//                                                is Attribute -> model.deprecation?.since?.toString() ?: "n/a"
+//                                                is Operation -> model.deprecation?.since?.toString() ?: "n/a"
+//                                                is Resource -> model.deprecation?.since?.toString() ?: "n/a"
+//                                                else -> "n/a"
+//                                            }
+//                                        )
                                     }
                                 }
                                 typeCell(model)

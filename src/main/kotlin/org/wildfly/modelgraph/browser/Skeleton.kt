@@ -8,25 +8,16 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import org.patternfly.ContextSelectorStore
 import org.patternfly.Size
-import org.patternfly.brand
 import org.patternfly.classes
-import org.patternfly.contextSelector
-import org.patternfly.dom.hideIf
 import org.patternfly.dom.showIf
 import org.patternfly.emptyState
 import org.patternfly.emptyStateBody
 import org.patternfly.fas
-import org.patternfly.horizontalNavigation
 import org.patternfly.item
 import org.patternfly.items
 import org.patternfly.modifier
-import org.patternfly.notificationBadge
+import org.patternfly.navigation
 import org.patternfly.page
-import org.patternfly.pageHeader
-import org.patternfly.pageHeaderTools
-import org.patternfly.pageHeaderToolsGroup
-import org.patternfly.pageHeaderToolsItem
-import org.patternfly.pageMain
 import org.patternfly.pageSection
 import org.patternfly.unwrap
 
@@ -58,17 +49,12 @@ fun RenderContext.skeleton(registry: Registry, placeManager: PlaceManager) {
     }
 
     page {
-        pageHeader(id = "mgb-masthead") {
-            brand {
-                link {
-                    href("#home")
-                }
-                img {
-                    src("./model-graph-browser.svg")
-                }
+        masthead {
+            brand("#home") {
+                src("./model-graph-browser.svg")
             }
-            horizontalNavigation(placeManager.router) {
-                items {
+            content {
+                navigation(placeManager.router) {
                     item(placeRequest(BROWSE), "Browse")
                     item(placeRequest(QUERY), "Query")
                     item(placeRequest(DEPRECATION), "Deprecation")
@@ -76,6 +62,8 @@ fun RenderContext.skeleton(registry: Registry, placeManager: PlaceManager) {
                     item(placeRequest(NEO4J), "Neo4j")
                 }
             }
+            // TODO navigation and tools
+/*
             pageHeaderTools {
                 pageHeaderToolsGroup {
                     pageHeaderToolsItem {
@@ -87,8 +75,9 @@ fun RenderContext.skeleton(registry: Registry, placeManager: PlaceManager) {
                     }
                 }
             }
+*/
         }
-        pageMain(id = "main") {
+        main(id = "main") {
             managedBy(placeManager)
         }
     }
