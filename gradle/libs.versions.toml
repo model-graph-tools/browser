@@ -1,7 +1,7 @@
 [versions]
 fileLoader = "6.2.0"
 fritz2 = "0.12"
-kotlin = "1.6.0-RC"
+kotlin = "1.6.0-RC2"
 mvp = "0.3.0"
 patternFly = "4.132.2"
 patternFlyFritz2 = "0.3.0-SNAPSHOT"
