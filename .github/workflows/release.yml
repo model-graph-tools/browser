@@ -8,7 +8,7 @@ on:
 
 jobs:
   release:
-    name: Build the browser and Nginx image and push to quay.io using version from tag
+    name: Build and Push to Quay.io
     runs-on: ubuntu-latest
 
     steps:
@@ -40,7 +40,7 @@ jobs:
           registry: quay.io
           username: modelgraphtools+modelgraphtools
           password: ${{ secrets.REGISTRY_PASSWORD }}
-      - name: Push To quay.io
+      - name: Push To Quay.io
         id: push-to-quay
         uses: redhat-actions/push-to-registry@v2
         with:
