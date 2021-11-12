@@ -1,5 +1,5 @@
 ---
-name: release
+name: push
 
 on:
   push:
@@ -29,9 +29,8 @@ jobs:
         id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
-          base-image: docker.io/nginx:latest
           image: quay.io/modelgraphtools/browser
-          tags: steps.get_version.outputs.version-without-v
+          tags: ${{ steps.get_version.outputs.version-without-v }}
           containerfiles: |
             ./src/main/nginx/Dockerfile
       - name: Log in to Quay.io
