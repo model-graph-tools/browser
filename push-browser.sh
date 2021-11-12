@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Builds the browser and copies the static assets into a Nginx image
+# Pushes the browser image to quay.io
 #
 # Parameters
 #   1. version (optional)
@@ -13,8 +13,6 @@ VERSION=$1
 TAG=quay.io/modelgraphtools/browser
 
 
-./gradlew build
-docker build \
-  --file src/main/nginx/Dockerfile \
-  --tag ${TAG}${VERSION:+:$VERSION} \
-  .
+# This requires a valid configuration in ~/.docker/config.json
+docker login quay.io
+docker push ${TAG}${VERSION:+:$VERSION}
