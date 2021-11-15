@@ -3,8 +3,8 @@ upstream mgtapi {
 }
 
 server {
-    listen 80;
-    listen [::]:80;
+    listen 8080;
+    listen [::]:8080;
     server_name mgt-browser;
 
     gzip on;

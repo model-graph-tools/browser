@@ -1,4 +1,4 @@
-FROM nginx:latest
+FROM nginxinc/nginx-unprivileged
 
 LABEL maintainer="Harald Pehl <hpehl@redhat.com>"
 
