@@ -1,6 +1,6 @@
 [versions]
 fileLoader = "6.2.0"
-fritz2 = "0.13"
+fritz2 = "0.12"
 kotlin = "1.6.0"
 mvp = "0.3.0"
 patternFly = "4.151.4"
