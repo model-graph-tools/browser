@@ -2,6 +2,7 @@ package org.wildfly.modelgraph.browser
 
 import dev.fritz2.binding.Handler
 import dev.fritz2.binding.RootStore
+import dev.fritz2.binding.Store
 import dev.fritz2.binding.storeOf
 import dev.fritz2.dom.html.RenderContext
 import dev.fritz2.lenses.IdProvider
@@ -21,7 +22,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
-import org.patternfly.BreadcrumbStore
 import org.patternfly.DoubleIcon
 import org.patternfly.ItemsStore
 import org.patternfly.Severity
@@ -93,7 +93,7 @@ class BrowsePresenter(
 
     override val view: BrowseView = BrowseView(this, registry)
 
-    val breadcrumbStore: BreadcrumbStore<Resource> = BreadcrumbStore(idProvider)
+    val breadcrumbStore: Store<List<Resource>> = RootStore(emptyList())
     val treeStore: TreeStore<Resource> = TreeStore(idProvider)
     val tabStore: TabStore<ResourceProperty> = TabStore { it.key }
     val resourceState: RootStore<ResourceState> = storeOf(NoResourceDetails)
@@ -119,28 +119,11 @@ class BrowsePresenter(
         with(registry) {
             // update tree if a new WildFly version has been selected
             selection.filter { it.isNotEmpty() }.map { } handledBy updateTree
-
-        }
-
-        with(breadcrumbStore) {
-            // breadcrumb:click -> treeItem:show
-            clicked.unwrap() handledBy treeStore.showItem
         }
 
         with(treeStore) {
             // treeItem:select -> breadcrumb:update
-            selected.map {
-                items(idProvider, breadcrumbStore.itemSelection) {
-                    val resources = it.path.unwrap()
-                    resources.forEachIndexed { index, resource ->
-                        item(resource) {
-                            if (index == resources.size - 1) {
-                                selected = true
-                            }
-                        }
-                    }
-                }
-            } handledBy breadcrumbStore.update
+            selected.map { it.path.unwrap() } handledBy breadcrumbStore.update
 
             // treeItem:select -> resource:load
             selected.filterNot { treeItem ->
@@ -278,7 +261,14 @@ class BrowseView(
             hideIf(registry.isEmpty())
             div(id = "mgb-browse-top", baseClass = classes("grid".layout("item"), "12-col".modifier())) {
                 breadcrumb(presenter.breadcrumbStore, noHomeLink = true) {
-                    display { +it.name }
+                    display {
+                        item(it) {
+                            +it.name
+                        }
+                    }
+                    events {
+                        selections handledBy presenter.treeStore.showItem
+                    }
                 }
             }
             div(baseClass = classes("grid".layout("item"), "4-col".modifier(), "mgb-browse-scroll")) {
