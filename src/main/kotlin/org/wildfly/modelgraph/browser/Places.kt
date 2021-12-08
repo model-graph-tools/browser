@@ -1,7 +1,7 @@
 package org.wildfly.modelgraph.browser
 
-import dev.fritz2.mvp.PlaceRequest
-import dev.fritz2.mvp.placeRequest
+import org.patternfly.mvp.PlaceRequest
+import org.patternfly.mvp.placeRequest
 
 const val BROWSE = "browse"
 const val HOME = "home"

@@ -4,10 +4,6 @@ import dev.fritz2.binding.Handler
 import dev.fritz2.binding.RootStore
 import dev.fritz2.binding.storeOf
 import dev.fritz2.dom.values
-import dev.fritz2.mvp.Presenter
-import dev.fritz2.mvp.View
-import dev.fritz2.mvp.ViewContent
-import dev.fritz2.mvp.WithPresenter
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import org.patternfly.ItemsStore
@@ -22,6 +18,10 @@ import org.patternfly.dataListRow
 import org.patternfly.dataListToggle
 import org.patternfly.dom.hideIf
 import org.patternfly.modifier
+import org.patternfly.mvp.Presenter
+import org.patternfly.mvp.View
+import org.patternfly.mvp.ViewContent
+import org.patternfly.mvp.WithPresenter
 import org.patternfly.pageSection
 import org.patternfly.pagination
 import org.patternfly.selectFormControl

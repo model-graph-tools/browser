@@ -1,8 +1,8 @@
 package org.wildfly.modelgraph.browser
 
-import dev.fritz2.mvp.PlaceManager
-import dev.fritz2.mvp.Presenter
-import dev.fritz2.mvp.placeRequest
+import org.patternfly.mvp.PlaceManager
+import org.patternfly.mvp.Presenter
+import org.patternfly.mvp.placeRequest
 import org.patternfly.ItemsStore
 import org.patternfly.pageSection
 import org.patternfly.title

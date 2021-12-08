@@ -6,11 +6,6 @@ import dev.fritz2.binding.Store
 import dev.fritz2.binding.storeOf
 import dev.fritz2.dom.html.RenderContext
 import dev.fritz2.lenses.IdProvider
-import dev.fritz2.mvp.PlaceRequest
-import dev.fritz2.mvp.Presenter
-import dev.fritz2.mvp.View
-import dev.fritz2.mvp.ViewContent
-import dev.fritz2.mvp.WithPresenter
 import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -54,6 +49,11 @@ import org.patternfly.item
 import org.patternfly.items
 import org.patternfly.layout
 import org.patternfly.modifier
+import org.patternfly.mvp.PlaceRequest
+import org.patternfly.mvp.Presenter
+import org.patternfly.mvp.View
+import org.patternfly.mvp.ViewContent
+import org.patternfly.mvp.WithPresenter
 import org.patternfly.pageSection
 import org.patternfly.tabs
 import org.patternfly.textContent

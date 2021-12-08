@@ -1,9 +1,6 @@
 package org.wildfly.modelgraph.browser
 
 import dev.fritz2.dom.html.RenderContext
-import dev.fritz2.mvp.PlaceManager
-import dev.fritz2.mvp.managedBy
-import dev.fritz2.mvp.placeRequest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import org.patternfly.ContextSelectorStore
@@ -16,6 +13,9 @@ import org.patternfly.fas
 import org.patternfly.item
 import org.patternfly.items
 import org.patternfly.modifier
+import org.patternfly.mvp.PlaceManager
+import org.patternfly.mvp.managedBy
+import org.patternfly.mvp.placeRequest
 import org.patternfly.navigation
 import org.patternfly.page
 import org.patternfly.pageSection

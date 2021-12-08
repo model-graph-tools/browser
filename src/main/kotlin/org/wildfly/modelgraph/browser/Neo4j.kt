@@ -1,11 +1,11 @@
 package org.wildfly.modelgraph.browser
 
-import dev.fritz2.mvp.Presenter
-import dev.fritz2.mvp.View
-import dev.fritz2.mvp.ViewContent
 import kotlinx.coroutines.flow.map
 import org.patternfly.dom.hideIf
 import org.patternfly.modifier
+import org.patternfly.mvp.Presenter
+import org.patternfly.mvp.View
+import org.patternfly.mvp.ViewContent
 import org.patternfly.pageSection
 import org.patternfly.textContent
 import org.patternfly.title

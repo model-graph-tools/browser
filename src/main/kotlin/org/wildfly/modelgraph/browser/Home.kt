@@ -1,8 +1,5 @@
 package org.wildfly.modelgraph.browser
 
-import dev.fritz2.mvp.Presenter
-import dev.fritz2.mvp.View
-import dev.fritz2.mvp.ViewContent
 import org.patternfly.card
 import org.patternfly.cardBody
 import org.patternfly.cardFooter
@@ -13,6 +10,9 @@ import org.patternfly.dom.hideIf
 import org.patternfly.fas
 import org.patternfly.icon
 import org.patternfly.modifier
+import org.patternfly.mvp.Presenter
+import org.patternfly.mvp.View
+import org.patternfly.mvp.ViewContent
 import org.patternfly.pageSection
 import org.patternfly.textContent
 import org.patternfly.title
